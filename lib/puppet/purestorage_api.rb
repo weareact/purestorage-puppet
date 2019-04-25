@@ -70,8 +70,8 @@ class PureStorageApi
         Puppet.debug("Received Response: #{response.inspect}")
         return response
       end
-    rescue Exception
-      Puppet.err("Device '" + @device_ip + "' is either not reachable or down!!!")
+    rescue => err
+      Puppet.err("Failed to make REST request to Pure Array: #{err.inspect}")
       #raise Exception
     end
   end
