@@ -57,8 +57,8 @@ describe Puppet::Util::NetworkDevice::Pure::Facts do
 
   context '#retrieve' do
     it "should get facts from array" do
-      allow(@transport).to receive(:getRestCall).with('/array').and_return(array_details)
-      allow(@transport).to receive(:getRestCall).with('/array?controllers=true').and_return(controller_details)
+      allow(@transport).to receive(:get_rest_call).with('/array').and_return(array_details)
+      allow(@transport).to receive(:get_rest_call).with('/array?controllers=true').and_return(controller_details)
       facts = @facts.retrieve
       expect(facts).to eq({
         'array_name'  => 'Pure01',

@@ -36,7 +36,7 @@ describe Puppet::Type.type(:pure_volume).provider(:volume) do
 
   describe '#instances' do
     it 'should return an array of current volumes' do
-      expect(@transport).to receive(:getRestCall).with('/volume') { JSON.parse(File.read(my_fixture('volume-list.json'))) }
+      expect(@transport).to receive(:get_rest_call).with('/volume') { JSON.parse(File.read(my_fixture('volume-list.json'))) }
       allow(described_class).to receive(:transport) { @transport }
 
       instances = described_class.instances
@@ -65,7 +65,7 @@ describe Puppet::Type.type(:pure_volume).provider(:volume) do
 
   describe '#prefetch' do
     it 'exists' do
-      expect(@transport).to receive(:getRestCall).with('/volume') { JSON.parse(File.read(my_fixture('volume-list.json'))) }
+      expect(@transport).to receive(:get_rest_call).with('/volume') { JSON.parse(File.read(my_fixture('volume-list.json'))) }
       allow(described_class).to receive(:transport) { @transport }
       current_provider = resource.provider
       resources = { 'volume-name' => resource }
@@ -76,7 +76,7 @@ describe Puppet::Type.type(:pure_volume).provider(:volume) do
 
   describe 'when creating a volume' do
     it 'should be able to create it' do
-      expect(@transport).to receive(:executeVolumeRestApi).with('create', 'pure_vol', '10G')
+      expect(@transport).to receive(:execute_volume_rest_api).with('create', 'pure_vol', '10G')
       allow(resource.provider).to receive(:transport) { @transport }
       resource.provider.create
     end
@@ -84,7 +84,7 @@ describe Puppet::Type.type(:pure_volume).provider(:volume) do
 
   describe 'when destroying a volume' do
     it 'should be able to delete it' do
-      expect(@transport).to receive(:executeVolumeRestApi).with('delete', 'pure_vol')
+      expect(@transport).to receive(:execute_volume_rest_api).with('delete', 'pure_vol')
       allow(resource.provider).to receive(:transport) { @transport }
       resource.provider.set(:name => 'pure_vol')
       resource.provider.destroy
@@ -95,7 +95,7 @@ describe Puppet::Type.type(:pure_volume).provider(:volume) do
   describe 'when modifying a volume' do
     describe 'for #size=' do
       it "should be able to increase a volume size" do
-        expect(@transport).to receive(:executeVolumeRestApi).with('update', 'pure_vol', '20G')
+        expect(@transport).to receive(:execute_volume_rest_api).with('update', 'pure_vol', '20G')
         allow(resource.provider).to receive(:transport) { @transport }
         # resource.provider.set(:name => 'pure_vol', :size => '10G')
         resource[:size] = '20G'

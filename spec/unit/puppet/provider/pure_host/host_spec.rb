@@ -35,7 +35,7 @@ describe Puppet::Type.type(:pure_host).provider(:host) do
 
   describe '#instances' do
     it 'should return an array of current hosts' do
-      expect(@transport).to receive(:getRestCall).with('/host') { JSON.parse(File.read(my_fixture('host-list.json'))) }
+      expect(@transport).to receive(:get_rest_call).with('/host') { JSON.parse(File.read(my_fixture('host-list.json'))) }
       allow(described_class).to receive(:transport) { @transport }
 
       instances = described_class.instances
@@ -61,7 +61,7 @@ describe Puppet::Type.type(:pure_host).provider(:host) do
 
   describe '#prefetch' do
     it 'exists' do
-      expect(@transport).to receive(:getRestCall).with('/host') { JSON.parse(File.read(my_fixture('host-list.json'))) }
+      expect(@transport).to receive(:get_rest_call).with('/host') { JSON.parse(File.read(my_fixture('host-list.json'))) }
       allow(described_class).to receive(:transport) { @transport }
       current_provider = resource.provider
       resources = { 'volume-name' => resource }
@@ -72,7 +72,7 @@ describe Puppet::Type.type(:pure_host).provider(:host) do
 
   describe 'when creating a volume' do
     it 'should be able to create it' do
-      expect(@transport).to receive(:executeHostRestApi).with('create', 'pure_host', nil, nil)
+      expect(@transport).to receive(:execute_host_rest_api).with('create', 'pure_host', nil, nil)
       allow(resource.provider).to receive(:transport) { @transport }
       resource.provider.create
     end
@@ -80,7 +80,7 @@ describe Puppet::Type.type(:pure_host).provider(:host) do
 
   describe 'when destroying a volume' do
     it 'should be able to delete it' do
-      expect(@transport).to receive(:executeHostRestApi).with('delete', 'pure_host')
+      expect(@transport).to receive(:execute_host_rest_api).with('delete', 'pure_host')
       allow(resource.provider).to receive(:transport) { @transport }
       resource.provider.set(:name => 'pure_host')
       resource.provider.destroy
@@ -91,7 +91,7 @@ describe Puppet::Type.type(:pure_host).provider(:host) do
   describe 'when modifying a volume' do
     describe 'for iqnlist' do
       it "should be able to update iqnlist" do
-        expect(@transport).to receive(:executeHostRestApi).with('update', 'pure_host', ['123456'], nil)
+        expect(@transport).to receive(:execute_host_rest_api).with('update', 'pure_host', ['123456'], nil)
         allow(resource.provider).to receive(:transport) { @transport }
         # resource.provider.set(:name => 'pure_vol', :size => '10G')
         resource[:iqnlist] = ['123456']
@@ -101,7 +101,7 @@ describe Puppet::Type.type(:pure_host).provider(:host) do
 
     describe 'for wwnlist' do
       it "should be able to update wwnlist" do
-        expect(@transport).to receive(:executeHostRestApi).with('update', 'pure_host', nil, ['abcdef'])
+        expect(@transport).to receive(:execute_host_rest_api).with('update', 'pure_host', nil, ['abcdef'])
         allow(resource.provider).to receive(:transport) { @transport }
         # resource.provider.set(:name => 'pure_vol', :size => '10G')
         resource[:wwnlist] = ['abcdef']

@@ -14,7 +14,7 @@ Puppet::Type.type(:pure_volume).provide(:volume,
     volumes = []
 
     # Get a list of volumes from Pure array
-    results = transport.getRestCall('/volume')
+    results = transport.get_rest_call('/volume')
     Puppet.debug("Got results: #{results.inspect}")
     results.each do |volume|
       Puppet.debug("Volume: #{volume.inspect}")
@@ -59,13 +59,13 @@ Puppet::Type.type(:pure_volume).provide(:volume,
   def flush
     Puppet.debug("Flushing resource #{resource[:name]}: #{resource.inspect}")
     if @property_hash[:ensure] == :absent
-      transport.executeVolumeRestApi(self.class::DELETE, resource[:name])
+      transport.execute_volume_rest_api(self.class::DELETE, resource[:name])
     end
   end
 
   def create
     Puppet.debug("<<<<<<<<<< Inside volume create for volume: #{resource[:name]} ")
-    transport.executeVolumeRestApi(self.class::CREATE, resource[:name], resource[:size])
+    transport.execute_volume_rest_api(self.class::CREATE, resource[:name], resource[:size])
   end
 
   def destroy
@@ -81,7 +81,7 @@ Puppet::Type.type(:pure_volume).provide(:volume,
   # size setter
   def size=(value)
     Puppet.debug("Puppet::Provider::Volume size=: setting volume size for volume #{resource[:name]}")
-    transport.executeVolumeRestApi(self.class::UPDATE, resource[:name], value)
+    transport.execute_volume_rest_api(self.class::UPDATE, resource[:name], value)
   end
 end
 

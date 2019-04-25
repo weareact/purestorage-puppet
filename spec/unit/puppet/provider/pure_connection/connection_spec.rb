@@ -37,7 +37,7 @@ describe Puppet::Type.type(:pure_connection).provider(:connection) do
 
   describe '#instances' do
     it 'should return an array of current host:volume connections' do
-      expect(@transport).to receive(:getRestCall).with('/volume?connect=true') { JSON.parse(File.read(my_fixture('volume-connection-list.json'))) }
+      expect(@transport).to receive(:get_rest_call).with('/volume?connect=true') { JSON.parse(File.read(my_fixture('volume-connection-list.json'))) }
       allow(described_class).to receive(:transport) { @transport }
 
       instances = described_class.instances
@@ -66,7 +66,7 @@ describe Puppet::Type.type(:pure_connection).provider(:connection) do
 
   describe '#prefetch' do
     it 'exists' do
-      expect(@transport).to receive(:getRestCall).with('/volume?connect=true') { JSON.parse(File.read(my_fixture('volume-connection-list.json'))) }
+      expect(@transport).to receive(:get_rest_call).with('/volume?connect=true') { JSON.parse(File.read(my_fixture('volume-connection-list.json'))) }
       allow(described_class).to receive(:transport) { @transport }
       current_provider = resource.provider
 
@@ -86,7 +86,7 @@ describe Puppet::Type.type(:pure_connection).provider(:connection) do
 
   describe 'when creating a connection' do
     it 'should be able to create it' do
-      expect(@transport).to receive(:executeConnectionRestApi).with('create', 'host_01', 'vol_01')
+      expect(@transport).to receive(:execute_connection_rest_api).with('create', 'host_01', 'vol_01')
       allow(resource.provider).to receive(:transport) { @transport }
       resource.provider.create
     end
@@ -94,7 +94,7 @@ describe Puppet::Type.type(:pure_connection).provider(:connection) do
 
   describe 'when destroying a connection' do
     it 'should be able to delete it' do
-      expect(@transport).to receive(:executeConnectionRestApi).with('delete', 'host_01', 'vol_01')
+      expect(@transport).to receive(:execute_connection_rest_api).with('delete', 'host_01', 'vol_01')
       allow(resource.provider).to receive(:transport) { @transport }
       resource.provider.destroy
     end

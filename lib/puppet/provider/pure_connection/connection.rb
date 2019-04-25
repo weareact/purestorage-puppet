@@ -14,7 +14,7 @@ Puppet::Type.type(:pure_connection).provide(:connection,
     connections = []
 
     # Get a list of volume connections from Pure array
-    results = transport.getRestCall('/volume?connect=true')
+    results = transport.get_rest_call('/volume?connect=true')
     Puppet.debug("Got results: #{results.inspect}")
 
     results.each do |connection|
@@ -46,12 +46,12 @@ Puppet::Type.type(:pure_connection).provide(:connection,
 
   def create
     Puppet.debug("<<<<<<<<<< Inside connection create")
-    transport.executeConnectionRestApi(self.class::CREATE,resource[:host_name],resource[:volume_name])
+    transport.execute_connection_rest_api(self.class::CREATE,resource[:host_name],resource[:volume_name])
   end
 
   def destroy
     Puppet.debug("<<<<<<<<<< Inside connection destroy")
-    transport.executeConnectionRestApi(self.class::DELETE,resource[:host_name],resource[:volume_name])
+    transport.execute_connection_rest_api(self.class::DELETE,resource[:host_name],resource[:volume_name])
   end
 
   def exists?
