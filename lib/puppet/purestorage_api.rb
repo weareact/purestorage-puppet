@@ -164,15 +164,7 @@ class PureStorageApi
 
     request = Net::HTTP::Get.new(uri.request_uri)
 
-    response = make_rest_api_call(request)
-
-    if response["pure_err_key"] == nil
-      Puppet.info(response)
-    else
-      Puppet.err(response)
-    end
-
-    response
+    make_rest_api_call(request)
   end
 
   #-------------------------------------------------
@@ -189,15 +181,7 @@ class PureStorageApi
     request          = Net::HTTP::Post.new(uri.request_uri)
     request.body     = arg_body.to_json
 
-    response = make_rest_api_call(request)
-
-    if response["pure_err_key"] == nil
-      Puppet.info(response)
-    else
-      Puppet.err(response)
-    end
-
-    response
+    make_rest_api_call(request)
   end
 
   #-------------------------------------------------
@@ -214,15 +198,7 @@ class PureStorageApi
     request          = Net::HTTP::Put.new(uri.request_uri, header)
     request.body     = arg_body.to_json
 
-    response = make_rest_api_call(request)
-
-    if response["pure_err_key"] == nil
-      Puppet.info(response)
-    else
-      Puppet.err(response)
-    end
-
-    response
+    make_rest_api_call(request)
   end
 
   #-------------------------------------------------
@@ -236,15 +212,7 @@ class PureStorageApi
 
     request          = Net::HTTP::Delete.new(uri.request_uri, header)
 
-    response = make_rest_api_call(request)
-
-    if response["pure_err_key"] == nil
-      Puppet.info(response)
-    else
-      Puppet.err(response)
-    end
-
-    response
+    make_rest_api_call(request)
   end
 
   #----------------------------------------------------
