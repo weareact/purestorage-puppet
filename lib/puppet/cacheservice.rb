@@ -57,9 +57,8 @@ class CacheService
       file = File.new(@cache_file_name, "a+")
       file.puts(key + ":" + value)
       file.close
-    rescue
-      #puts "File '"+ @cache_file_name +"' not found or some other exception in writeCache()!!!"
-      Puppet.debug("File '" + @cache_file_name + "' not found or some other exception in writeCache()!!!")
+    rescue => err
+      Puppet.debug("Error writing to cache: #{err.inspect}")
       return nil
     end
   end
@@ -73,7 +72,6 @@ class CacheService
       line_num = 0
       while line_num < lines.size do
         if (lines[line_num] != nil) and (lines[line_num].strip.index(key) == 0) and (lines[line_num].strip.include? key)
-          #puts "Key " + key + " is found!!!"
           Puppet.debug("Key " + key + " is found!!!")
           value = lines[line_num].strip.split(":")[1]
           return value
@@ -81,9 +79,8 @@ class CacheService
         line_num = +1
       end
       return nil
-    rescue
-      #puts "File '"+ @cache_file_name +"' not found or key not found in cache readCache()!!!"
-      Puppet.debug("File '" + @cache_file_name + "' not found or key not found in cache readCache()!!!")
+    rescue => err
+      Puppet.debug("Error reading from cache: #{err.inspect}")
       return nil
     end
   end
@@ -94,11 +91,9 @@ class CacheService
   def delete_cache
     begin
       File.delete(@cache_file_name) if File::exist?(@cache_file_name)
-      #puts "File '"+ @cache_file_name +"' deleted successfully!!!"
       Puppet.debug("File '" + @cache_file_name + "' deleted successfully!!!")
-    rescue
-      #puts "File '"+ @cache_file_name +"' not found or some other exception in deleteCache()!!!"
-      Puppet.debug("File '" + @cache_file_name + "' not found or some other exception in deleteCache()!!!")
+    rescue => err
+      Puppet.debug("Error deleting cache: #{err.inspect}")
       return nil
     end
   end
