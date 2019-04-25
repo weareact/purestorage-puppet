@@ -15,57 +15,60 @@ require 'json'
 require 'puppet/cacheservice'
 
 class PureStorageApi
-  
-  CONTENT_TYPE      = "Content-Type"
-  APPLICATION_JSON  = "application/json"
-  COOKIE            = "Cookie"
-  TOKEN             = "TOKEN"
-  SESSION_KEY       = "SESSION_KEY"
-  REST_VERSION      = "1.12"
-  CREATE            = "create"
-  UPDATE            = "update"
-  DELETE            = "delete"
-  LIST              = "list"
-  
-  # #------------------------------------------------------------------------------------
-  # # Constructor
-  # #------------------------------------------------------------------------------------
-  # def initialize(url)
-  #   @url = URI.parse(url)
-  #   @deviceIp = @url.host
-  #   @userName = @url.user
-  #   @password = @url.password
-  #   @restVersion = REST_VERSION
-  #   #Base URI is ... https://m70.purecloud.local/api/1.12
-  #   @baseUri = "https://" + @deviceIp + "/api/"+@restVersion
-  #   @cacheService = CacheService.new(@deviceIp)
 
-  #   #Delete Cache if its expired.
-  #   if(@cacheService.isCacheExpired)
-  #    # puts "Cache is expired, hence deleting file :" + @deviceIp
-  #    Puppet.debug "Cache is expired, hence deleting file :" + @deviceIp
-  #     @cacheService.deleteCache()
-  #   end
-  # end
+  CONTENT_TYPE        = "Content-Type"
+  APPLICATION_JSON    = "application/json"
+  COOKIE              = "Cookie"
+  TOKEN               = "TOKEN"
+  SESSION_KEY         = "SESSION_KEY"
+  REST_VERSION        = "1.12"
+  CREATE              = "create"
+  UPDATE              = "update"
+  DELETE              = "delete"
+  LIST                = "list"
 
   # -----------------------------------------------------------------------------------
   # Constructor
   # -----------------------------------------------------------------------------------
-  def initialize(device_ip,username,password,rest_version)
-    @device_ip    = device_ip
-    @username     = username
-    @password     = password
-    @rest_version = rest_version
-    #Base URI is ... https://m70.purecloud.local/api/1.12
-    @base_uri      = "https://" + device_ip + "/api/"+rest_version
+  def initialize(device_ip, username, password, rest_version)
+    @device_ip     = device_ip
+    @username      = username
+    @password      = password
+    @rest_version  = rest_version
+    @base_uri      = "https://" + device_ip + "/api/" + rest_version
     @cache_service = CacheService.new(device_ip)
 
     #Delete Cache if its expired.
     if @cache_service.has_cache_expired
-    # puts "Cache is expired, hence deleting file :" + @deviceIp
-    Puppet.debug "Cache is expired, hence deleting file :" + @device_ip
-    @cache_service.delete_cache
-    end       
+      # puts "Cache is expired, hence deleting file :" + @deviceIp
+      Puppet.debug "Cache is expired, hence deleting file :" + @device_ip
+      @cache_service.delete_cache
+    end
+  end
+
+  def make_rest_api_call(request, session_header = true, parse_response = true)
+    # Create the HTTP objects
+    http             = Net::HTTP.new(uri.host, uri.port)
+    http.use_ssl     = true
+    http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+
+    request.add_field(CONTENT_TYPE, APPLICATION_JSON)
+    if session_header
+      request.add_field(COOKIE, get_session)
+    end
+
+    begin
+      # Send the request and parse response
+      response = http.request(request)
+      if parse_response
+        return JSON.parse(response.body)
+      else
+        return response
+      end
+    rescue Exception
+      Puppet.err("Device '" + @device_ip + "' is either not reachable or down!!!")
+      #raise Exception
+    end
   end
 
   #------------------------------------------------------------------------------------
@@ -77,54 +80,29 @@ class PureStorageApi
   #------------------------------------------------------------------------------------
   def create_token
     token = nil
-    
-    begin 
+
+    begin
       token = @cache_service.read_cache(TOKEN)
-     # puts "Found Token : " + token
-     Puppet.debug("Found Token : " + token)
+      Puppet.debug("Found Token : " + token)
     rescue
       Puppet.debug("Looks like token is not cashed earlier or some other issue!")
     end
-      
+
     if token == nil
-        #uri = URI.parse('https://m70.purecloud.local/api/1.12/auth/apitoken')
-        url = @base_uri + "/auth/apitoken"
-        uri = URI.parse(url)
-        
-        #Define Header here
-        #header = {'Content-Type'=> 'application/json'}
-        header = {CONTENT_TYPE  => APPLICATION_JSON}
-          
-        # Create the HTTP objects
-        http = Net::HTTP.new(uri.host, uri.port)
-        http.use_ssl = true
-        http.verify_mode = OpenSSL::SSL::VERIFY_NONE
-        
-        #Get Request Object
-        request = Net::HTTP::Post.new(uri.request_uri, header)
-        
-        #Set Body for the request
-        #request.set_form_data('password' => 'pureuser', 'username' => 'pureuser')
-        request.set_form_data('password' => @password, 'username' => @username)
-        begin
-          # Send the request
-          response = http.request(request)
-          parsed = JSON.parse(response.body)
-          token = parsed['api_token']
-          #Store in Cache  
-          @cache_service.write_cache(TOKEN,token)
-        rescue Exception
-          #puts "Device '"+@deviceIp + "' is either not reachable or down!!!"
-          Puppet.err("Device '"+@device_ip + "' is either not reachable or down!!!")
-          #raise Exception          
-        end
-      else
-       # puts "TODO Else of if token == nil"
-      end
+      uri = URI.parse(@base_uri + "/auth/apitoken")
+
+      request = Net::HTTP::Post.new(uri.request_uri)
+      request.set_form_data('password' => @password, 'username' => @username)
+
+      response = make_rest_api_call(request, false)
+
+      token = response['api_token']
+      @cache_service.write_cache(TOKEN, token)
+    end
 
     token
   end
-  
+
   #----------------------------------------------------------------------------
   #Step 2: Create session by passing token obtained in createToken method
   # e.g.
@@ -135,52 +113,27 @@ class PureStorageApi
   def create_session (token)
     session_key = nil
 
-    begin 
+    begin
       session_key = @cache_service.read_cache(SESSION_KEY)
-     # puts "Found session_key : " + session_key
-     Puppet.debug("Found session_key : " + session_key)
+      Puppet.debug("Found session_key : " + session_key)
     rescue
-      #puts "Looks like session is not cashed earlier or some other issue!"
-      Puppet.debug("Looks like session is not cashed earlier or some other issue!")
+      Puppet.debug("Looks like session is not cached earlier or some other issue!")
     end
 
     if session_key == nil
-      #uri = URI.parse('https://m70.purecloud.local/api/1.12/auth/session')
-      url = @base_uri + "/auth/session"
-      uri = URI.parse(url)
+      uri = URI.parse(@base_uri + "/auth/session")
 
-      #Define Header here  
-      #header = {'Content-Type'=> 'application/json'}
-      header = {CONTENT_TYPE  => APPLICATION_JSON}
-
-      # Create the HTTP objects
-      http = Net::HTTP.new(uri.host, uri.port)
-      http.use_ssl = true
-      http.verify_mode = OpenSSL::SSL::VERIFY_NONE
-      #Get Request Object
-      request = Net::HTTP::Post.new(uri.request_uri, header)
-      #Set Body for the request
-      #request.set_form_data('api_token' => '859024da-a74a-babd-a7a7-b9835f2b2aba')
+      request = Net::HTTP::Post.new(uri.request_uri)
       request.set_form_data('api_token' => token)
-      begin
-        # Send the request
-        response = http.request(request)
-        # parsed header against 'Set-Cookie' contains session information
-        session_key = response.header['Set-Cookie']
-        #puts session_key
-        #Store in Cache  
-        @cache_service.write_cache(SESSION_KEY,session_key)
-      rescue Exception
-        #puts "Device '"+@deviceIp + "' is either not reachable or down!!!"
-        Puppet.err("Device '"+@device_ip + "' is either not reachable or down!!!")
-        #raise Exception          
-      end
-    else
-      # puts "TODO Else of if session_key == nil"
+
+      response = make_rest_api_call(request, false, false)
+
+      session_key = response.header['Set-Cookie']
+      @cache_service.write_cache(SESSION_KEY, session_key)
     end
     session_key
   end
-  
+
   #-------------------------------------------------
   # This method calls creates (token and session)
   # e.g.
@@ -190,48 +143,35 @@ class PureStorageApi
   def get_session
     token = create_token
     if token == nil
-      raise "Unable to create a token for device: "+@device_ip+". Please check the credentials or device Ip Address provided in the url!"
+      raise "Unable to create a token for device: " + @device_ip + ". Please check the credentials or device Ip Address provided in the url!"
     else
       session = create_session(token)
     end
 
     session
   end
-  
+
   #-------------------------------------------------
   # Generic method for GET requests
   # e.g.
   # GET  https://pure01.example.com/api/1.12/volume
   #-------------------------------------------------
   def get_rest_call(arg_url)
-    #uri = URI.parse('https://m70.purecloud.local/api/1.12/volume')
-    url = @base_uri + arg_url
-    uri = URI.parse(url)
-    
-    #get session
-    session = get_session
-    
-    #Pass Session in header   
-    header = {CONTENT_TYPE  => APPLICATION_JSON,  COOKIE => session}
-    
-    # Create the HTTP objects
-    http = Net::HTTP.new(uri.host, uri.port)
-    http.use_ssl = true
-    http.verify_mode = OpenSSL::SSL::VERIFY_NONE
-    request = Net::HTTP::Get.new(uri.request_uri,header)
-    # Send the request
-    response = http.request(request)
-    
-    #puts response.body
-     if response.body["pure_err_key"] == nil
-       Puppet.info(response.body)
-     else
-       Puppet.err(response.body)
-     end
+    uri = URI.parse(@base_uri + arg_url)
 
-    response.body
+    request = Net::HTTP::Get.new(uri.request_uri)
+
+    response = make_rest_api_call(request)
+
+    if response["pure_err_key"] == nil
+      Puppet.info(response)
+    else
+      Puppet.err(response)
+    end
+
+    response
   end
-  
+
   #-------------------------------------------------
   # Generic method for POST requests 
   # e.g.
@@ -240,112 +180,79 @@ class PureStorageApi
   #   "size": "5G"
   # }
   #-------------------------------------------------
-  def post_rest_call(arg_url,arg_body)
-   
-       url = @base_uri + arg_url
-       uri = URI.parse(url)
-       
-       #get session
-       session = get_session
-       
-       #Pass Session in header   
-       header = {CONTENT_TYPE  => APPLICATION_JSON,  COOKIE => session}
-       
-       # Create the HTTP objects
-       http = Net::HTTP.new(uri.host, uri.port)
-       http.use_ssl = true
-       http.verify_mode = OpenSSL::SSL::VERIFY_NONE
-       request = Net::HTTP::Post.new(uri.request_uri,header)
-       request.body = arg_body.to_json
-      # puts "@@@@@@@@: "+ request.body
-       
-       # Send the request
-       response = http.request(request)
-       
-      # puts response.body
-      if response.body["pure_err_key"] == nil
-        Puppet.info(response.body)
-      else
-        Puppet.err(response.body)
-      end 
-  end
-  
-#-------------------------------------------------
- # Generic method for POST requests 
- # e.g.
- # PUT https://pure01.example.com/api/1.12/volume/v5
- #  {
- #    size: 10G
- #  }
- #-------------------------------------------------
- def put_rest_call(arg_url,arg_body)
-  
-      url = @base_uri + arg_url
-      uri = URI.parse(url)
-      
-      #get session
-      session = get_session
-      
-      #Pass Session in header   
-      header = {CONTENT_TYPE  => APPLICATION_JSON,  COOKIE => session}
-      
-      # Create the HTTP objects
-      http = Net::HTTP.new(uri.host, uri.port)
-      http.use_ssl = true
-      http.verify_mode = OpenSSL::SSL::VERIFY_NONE
-      request = Net::HTTP::Put.new(uri.request_uri,header)
-      request.body = arg_body.to_json
-     # puts "@@@@@@@@: "+ request.body
-      
-      # Send the request
-      response = http.request(request)
-      
-      #puts response.body
-     if response.body["pure_err_key"] == nil
-       Puppet.info(response.body)
-     else
-       Puppet.err(response.body)
-     end 
- end
- 
-#-------------------------------------------------
- # Generic method for delete requests 
- # e.g.
- # POST https://pure01.example.com/api/1.12/volume/v5
- # {
- #   "size": "5G"
- # }
- #-------------------------------------------------
- def delete_rest_call(arg_url)
-  
-      url = @base_uri + arg_url
-      uri = URI.parse(url)
-      
-      #get session
-      session = get_session
-      
-      #Pass Session in header   
-      header = {CONTENT_TYPE  => APPLICATION_JSON,  COOKIE => session}
-      
-      # Create the HTTP objects
-      http = Net::HTTP.new(uri.host, uri.port)
-      http.use_ssl = true
-      http.verify_mode = OpenSSL::SSL::VERIFY_NONE
-      request = Net::HTTP::Delete.new(uri.request_uri,header)
-      
-      # Send the request
-      response = http.request(request)
- end
- 
- #----------------------------------------------------
- # This method checks if volume with given name exists
- #  It is dedicated to volumes
- #-----------------------------------------------
-  def does_volume_exist(arg_volume_name)
-      url = "/volume/"+arg_volume_name
-      output = get_rest_call(url)
+  def post_rest_call(arg_url, arg_body)
+    uri = URI.parse(@base_uri + arg_url)
 
-      output["pure_err_key"] == nil
+    request          = Net::HTTP::Post.new(uri.request_uri)
+    request.body     = arg_body.to_json
+
+    response = make_rest_api_call(request)
+
+    if response["pure_err_key"] == nil
+      Puppet.info(response)
+    else
+      Puppet.err(response)
+    end
+
+    response
+  end
+
+  #-------------------------------------------------
+  # Generic method for PUT requests
+  # e.g.
+  # PUT https://pure01.example.com/api/1.12/volume/v5
+  #  {
+  #    size: 10G
+  #  }
+  #-------------------------------------------------
+  def put_rest_call(arg_url, arg_body)
+    uri = URI.parse(@base_uri + arg_url)
+
+    request          = Net::HTTP::Put.new(uri.request_uri, header)
+    request.body     = arg_body.to_json
+
+    response = make_rest_api_call(request)
+
+    if response["pure_err_key"] == nil
+      Puppet.info(response)
+    else
+      Puppet.err(response)
+    end
+
+    response
+  end
+
+  #-------------------------------------------------
+  # Generic method for DELETE requests
+  # e.g.
+  # DELETE https://pure01.example.com/api/1.12/volume/v5
+  #-------------------------------------------------
+  def delete_rest_call(arg_url)
+
+    uri = URI.parse(@base_uri + arg_url)
+
+    request          = Net::HTTP::Delete.new(uri.request_uri, header)
+
+    response = make_rest_api_call(request)
+
+    if response["pure_err_key"] == nil
+      Puppet.info(response)
+    else
+      Puppet.err(response)
+    end
+
+    response
+  end
+
+  #----------------------------------------------------
+  # This method checks if volume with given name exists
+  #  It is dedicated to volumes
+  #-----------------------------------------------
+  def does_volume_exist(arg_volume_name)
+    url    = "/volume/" + arg_volume_name
+    output = get_rest_call(url)
+
+    output["pure_err_key"] == nil
   end
 
 
@@ -354,34 +261,33 @@ class PureStorageApi
   # which rest api to call depending on key
   # It is dedicated to volumes
   #-----------------------------------------------
-  def execute_volume_rest_api(arg_key,*arg)
-    Puppet.info(arg_key + " Action for volume:"+ arg[0])
+  def execute_volume_rest_api(arg_key, *arg)
+    Puppet.info(arg_key + " Action for volume:" + arg[0])
     case arg_key
-    when LIST  then
+    when LIST then
       get_rest_call("/volume")
-    when  CREATE then #arg[0] = volume_name, arg[1] = volume_size
-        url = "/volume/"+arg[0]
-        body = Hash.new("size" => arg[1]) 
-      post_rest_call(url,body["size"])
-    when  UPDATE then
-        url = "/volume/"+arg[0]
-        body = Hash.new("size" => arg[1]) 
-      put_rest_call(url,body["size"])
-    when  DELETE then
-        url = "/volume/"+arg[0]
+    when CREATE then #arg[0] = volume_name, arg[1] = volume_size
+      url  = "/volume/" + arg[0]
+      body = Hash.new("size" => arg[1])
+      post_rest_call(url, body["size"])
+    when UPDATE then
+      url  = "/volume/" + arg[0]
+      body = Hash.new("size" => arg[1])
+      put_rest_call(url, body["size"])
+    when DELETE then
+      url = "/volume/" + arg[0]
       delete_rest_call(url)
     else
-      #puts "Invalid Option:" + arg_key
       Puppet.err("Invalid Operation:" + arg_key + ", Available operations are [create,update,delete,list].")
-    end      
+    end
   end
-  
+
   #----------------------------------------------------
   # This method checks if volume with given name exists
   # It is dedicated to hosts
   #-----------------------------------------------
   def does_host_exist(arg_host_name)
-    url = "/host/"+arg_host_name
+    url    = "/host/" + arg_host_name
     output = get_rest_call(url)
 
     output["pure_err_key"] == nil
@@ -392,36 +298,36 @@ class PureStorageApi
   # which rest api to call depending on key
   # It is dedicated to Hosts
   #-----------------------------------------------
-  def execute_host_rest_api(arg_key,*arg)
-    Puppet.info(arg_key + " Action for host:"+ arg[0])
+  def execute_host_rest_api(arg_key, *arg)
+    Puppet.info(arg_key + " Action for host:" + arg[0])
     case arg_key
-    when LIST  then
+    when LIST then
       get_rest_call("/host")
-    when  CREATE then #arg[0] = volume_name, arg[1] = volume_size
-      url = "/host/"+arg[0]
+    when CREATE then #arg[0] = volume_name, arg[1] = volume_size
+      url  = "/host/" + arg[0]
       body = Hash.new("iqnlist" => arg[1], "wwnlist" => arg[2])
-      post_rest_call(url,body)
-    when  UPDATE then
-      url = "/host/"+arg[0]
+      post_rest_call(url, body)
+    when UPDATE then
+      url  = "/host/" + arg[0]
       body = Hash.new("iqnlist" => arg[1], "wwnlist" => arg[2])
-      put_rest_call(url,body)
-    when  DELETE then
-      url = "/host/"+arg[0]
+      put_rest_call(url, body)
+    when DELETE then
+      url = "/host/" + arg[0]
       delete_rest_call(url)
     else
       Puppet.err("Invalid Option:" + arg_key)
     end
   end
- 
+
   #----------------------------------------------------
   # This method checks if connection with given name exists
   # It is dedicated to volumes
   # -----------------------------------------------
   def does_connection_exist(arg_host_name)
-     url = "/host/"+arg_host_name+"/volume"
-     output = get_rest_call(url)
+    url    = "/host/" + arg_host_name + "/volume"
+    output = get_rest_call(url)
 
-     output["vol"] != nil
+    output["vol"] != nil
   end
 
   #-------------------------------------------------
@@ -430,17 +336,17 @@ class PureStorageApi
   # It is dedicated to Hosts
   # arg[0] = hostname, arg[1] = volumename
   #-----------------------------------------------
-  def execute_connection_rest_api(arg_key,*arg)
-    Puppet.info(arg_key + " Action for connection between host :"+arg[0]+" and volume:"+ arg[1])
-   case arg_key
-   when  CREATE then #arg[0] = volume_name, arg[1] = volume_size
-       url = "/host/"+arg[0]+"/volume/"+arg[1]
-       post_rest_call(url,"")
-   when  DELETE then
-       url = "/host/"+arg[0]+"/volume/"+arg[1]
-       delete_rest_call(url)
-   else
+  def execute_connection_rest_api(arg_key, *arg)
+    Puppet.info(arg_key + " Action for connection between host :" + arg[0] + " and volume:" + arg[1])
+    case arg_key
+    when CREATE then #arg[0] = volume_name, arg[1] = volume_size
+      url = "/host/" + arg[0] + "/volume/" + arg[1]
+      post_rest_call(url, "")
+    when DELETE then
+      url = "/host/" + arg[0] + "/volume/" + arg[1]
+      delete_rest_call(url)
+    else
       Puppet.err("Invalid Option:" + arg_key)
-   end      
+    end
   end
 end
