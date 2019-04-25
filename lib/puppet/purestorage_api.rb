@@ -48,7 +48,7 @@ class PureStorageApi
 
   def make_rest_api_call(request, session_header = true, parse_response = true)
     # Create the HTTP objects
-    http             = Net::HTTP.new(uri.host, uri.port)
+    http             = Net::HTTP.new(request.uri.host, request.uri.port)
     http.use_ssl     = true
     http.verify_mode = OpenSSL::SSL::VERIFY_NONE
 
