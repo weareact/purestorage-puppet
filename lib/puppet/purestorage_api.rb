@@ -16,16 +16,16 @@ require 'puppet/cacheservice'
 
 class PureStorageApi
 
-  CONTENT_TYPE        = "Content-Type"
-  APPLICATION_JSON    = "application/json"
-  COOKIE              = "Cookie"
-  TOKEN               = "TOKEN"
-  SESSION_KEY         = "SESSION_KEY"
-  REST_VERSION        = "1.12"
-  CREATE              = "create"
-  UPDATE              = "update"
-  DELETE              = "delete"
-  LIST                = "list"
+  CONTENT_TYPE     = "Content-Type"
+  APPLICATION_JSON = "application/json"
+  COOKIE           = "Cookie"
+  TOKEN            = "TOKEN"
+  SESSION_KEY      = "SESSION_KEY"
+  REST_VERSION     = "1.12"
+  CREATE           = "create"
+  UPDATE           = "update"
+  DELETE           = "delete"
+  LIST             = "list"
 
   # -----------------------------------------------------------------------------------
   # Constructor
@@ -45,15 +45,18 @@ class PureStorageApi
     end
   end
 
-  def make_rest_api_call(request, session_header = true, parse_response = true)
+  def make_rest_api_call(request, session_header = true, add_json_header = true, parse_response = true)
     # Create the HTTP objects
-    uri = URI.parse(@base_uri)
+    uri              = URI.parse(@base_uri)
     http             = Net::HTTP.new(uri.host, uri.port)
     http.use_ssl     = true
     http.verify_mode = OpenSSL::SSL::VERIFY_NONE
     http.set_debug_output($stdout)
 
-    request.add_field(CONTENT_TYPE, APPLICATION_JSON)
+    if add_json_header
+      request.add_field(CONTENT_TYPE, APPLICATION_JSON)
+    end
+
     if session_header
       request.add_field(COOKIE, get_session)
     end
@@ -98,7 +101,7 @@ class PureStorageApi
       request = Net::HTTP::Post.new(uri.request_uri)
       request.set_form_data('password' => @password, 'username' => @username)
 
-      response = make_rest_api_call(request, false)
+      response = make_rest_api_call(request, false, false)
 
       token = response['api_token']
       @cache_service.write_cache(TOKEN, token)
@@ -130,7 +133,7 @@ class PureStorageApi
       request = Net::HTTP::Post.new(uri.request_uri)
       request.set_form_data('api_token' => token)
 
-      response = make_rest_api_call(request, false, false)
+      response = make_rest_api_call(request, false, true, false)
 
       session_key = response.header['Set-Cookie']
       @cache_service.write_cache(SESSION_KEY, session_key)
@@ -179,8 +182,8 @@ class PureStorageApi
   def post_rest_call(arg_url, arg_body)
     uri = URI.parse(@base_uri + arg_url)
 
-    request          = Net::HTTP::Post.new(uri.request_uri)
-    request.body     = arg_body.to_json
+    request      = Net::HTTP::Post.new(uri.request_uri)
+    request.body = arg_body.to_json
 
     make_rest_api_call(request)
   end
@@ -196,8 +199,8 @@ class PureStorageApi
   def put_rest_call(arg_url, arg_body)
     uri = URI.parse(@base_uri + arg_url)
 
-    request          = Net::HTTP::Put.new(uri.request_uri, header)
-    request.body     = arg_body.to_json
+    request      = Net::HTTP::Put.new(uri.request_uri, header)
+    request.body = arg_body.to_json
 
     make_rest_api_call(request)
   end
@@ -211,7 +214,7 @@ class PureStorageApi
 
     uri = URI.parse(@base_uri + arg_url)
 
-    request          = Net::HTTP::Delete.new(uri.request_uri, header)
+    request = Net::HTTP::Delete.new(uri.request_uri, header)
 
     make_rest_api_call(request)
   end
