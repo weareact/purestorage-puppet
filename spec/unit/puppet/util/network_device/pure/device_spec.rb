@@ -33,9 +33,9 @@ describe Puppet::Util::NetworkDevice::Pure::Device do
       end
 
       it "should connect to the specificed Pure array" do
-        expect(PureStorageApi).to receive(:new).with('pure01.example.com', 'admin', 'secret', '1.6') { @transport }
+        expect(PureStorageApi).to receive(:new).with('pure01.example.com', 'admin', 'secret', '1.12') { @transport }
         pure = described_class.new('https://admin:secret@pure01.example.com')
-        expect(pure.api_version).to eq('1.6')
+        expect(pure.api_version).to eq('1.12')
       end
 
       describe 'with an api_version provided' do

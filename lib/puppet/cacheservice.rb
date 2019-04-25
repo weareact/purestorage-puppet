@@ -5,7 +5,7 @@
 # in REST API calls in Pure Storage Array.
 #  
 #
-# Supports REST API 1.6
+# Supports REST API 1.12
 #=====================================
 
 require 'tmpdir'

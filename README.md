@@ -34,7 +34,7 @@ Using the `volume`, `hostconfig` and `connection` types, one
 can quickly provision remote storage and attach it via iSCSI from a
 Pure Storage array to a client.
 
-The provider utilizes the robust REST API (V1.6) available on the Pure Storage
+The provider utilizes the robust REST API (V1.12) available on the Pure Storage
 array to remotely provision the necessary resources.
 
 ## Setup
