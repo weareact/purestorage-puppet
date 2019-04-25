@@ -62,7 +62,9 @@ class PureStorageApi
       # Send the request and parse response
       response = http.request(request)
       if parse_response
-        return JSON.parse(response.body)
+        json_response = JSON.parse(response.body)
+        Puppet.debug("Received JSON Response: #{json_response.inspect}")
+        return json_response
       else
         return response
       end
