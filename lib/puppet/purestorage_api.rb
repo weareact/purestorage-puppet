@@ -90,9 +90,9 @@ class PureStorageApi
 
     begin
       token = @cache_service.read_cache(TOKEN)
-      Puppet.debug("Found Token : " + token)
-    rescue
-      Puppet.debug("Looks like token is not cached earlier or some other issue!")
+      Puppet.debug("Found Token: " + token)
+    rescue => err
+      Puppet.debug("Error retrieving token from cache: #{err}")
     end
 
     if token == nil
@@ -123,8 +123,8 @@ class PureStorageApi
     begin
       session_key = @cache_service.read_cache(SESSION_KEY)
       Puppet.debug("Found session_key : " + session_key)
-    rescue
-      Puppet.debug("Looks like session is not cached earlier or some other issue!")
+    rescue => err
+      Puppet.debug("Error retrieving session from cache: #{err}")
     end
 
     if session_key == nil
@@ -132,7 +132,7 @@ class PureStorageApi
 
       request = Net::HTTP::Post.new(uri.request_uri)
       body    = Hash.new("api_token" => token)
-      request.body(body.to_json)
+      request.body = body.to_json
 
       response = make_rest_api_call(request, false, true, false)
 
