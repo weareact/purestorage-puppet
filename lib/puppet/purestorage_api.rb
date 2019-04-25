@@ -131,7 +131,7 @@ class PureStorageApi
       uri = URI.parse(@base_uri + "/auth/session")
 
       request = Net::HTTP::Post.new(uri.request_uri)
-      body    = {:api_token => token}
+      body    = Hash.new("api_token" => token)
       request.body(body.to_json)
 
       response = make_rest_api_call(request, false, true, false)
