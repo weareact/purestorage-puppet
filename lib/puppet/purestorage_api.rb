@@ -51,7 +51,7 @@ class PureStorageApi
     http             = Net::HTTP.new(uri.host, uri.port)
     http.use_ssl     = true
     http.verify_mode = OpenSSL::SSL::VERIFY_NONE
-    http.set_debug_output(Puppet.debug)
+    http.set_debug_output($stdout)
 
     request.add_field(CONTENT_TYPE, APPLICATION_JSON)
     if session_header
