@@ -40,7 +40,6 @@ class PureStorageApi
 
     #Delete Cache if its expired.
     if @cache_service.has_cache_expired
-      # puts "Cache is expired, hence deleting file :" + @deviceIp
       Puppet.debug "Cache is expired, hence deleting file :" + @device_ip
       @cache_service.delete_cache
     end
@@ -60,7 +59,7 @@ class PureStorageApi
 
     begin
       # Send the request and parse response
-      Puppet.debug("Making REST Request: #{request.inspect}")
+      Puppet.debug("Making REST Request to #{request.uri.inspect} with body #{request.body.inspect}")
       response = http.request(request)
       if parse_response
         json_response = JSON.parse(response.body)
@@ -90,7 +89,7 @@ class PureStorageApi
       token = @cache_service.read_cache(TOKEN)
       Puppet.debug("Found Token : " + token)
     rescue
-      Puppet.debug("Looks like token is not cashed earlier or some other issue!")
+      Puppet.debug("Looks like token is not cached earlier or some other issue!")
     end
 
     if token == nil
