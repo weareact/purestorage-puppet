@@ -131,7 +131,7 @@ class PureStorageApi
       uri = URI.parse(@base_uri + "/auth/session")
 
       request = Net::HTTP::Post.new(uri.request_uri)
-      body    = Hash.new("api_token" => token)
+      body    = {:api_token => token}
       request.body = body.to_json
 
       response = make_rest_api_call(request, false, true, false)
@@ -244,11 +244,11 @@ class PureStorageApi
       get_rest_call("/volume")
     when CREATE then #arg[0] = volume_name, arg[1] = volume_size
       url  = "/volume/" + arg[0]
-      body = Hash.new("size" => arg[1])
+      body = {:size => arg[1]}
       post_rest_call(url, body["size"])
     when UPDATE then
       url  = "/volume/" + arg[0]
-      body = Hash.new("size" => arg[1])
+      body = {:size => arg[1]}
       put_rest_call(url, body["size"])
     when DELETE then
       url = "/volume/" + arg[0]
@@ -281,11 +281,11 @@ class PureStorageApi
       get_rest_call("/host")
     when CREATE then #arg[0] = volume_name, arg[1] = volume_size
       url  = "/host/" + arg[0]
-      body = Hash.new("iqnlist" => arg[1], "wwnlist" => arg[2])
+      body = {:iqnlist => arg[1], :wwnlist => arg[2]}
       post_rest_call(url, body)
     when UPDATE then
       url  = "/host/" + arg[0]
-      body = Hash.new("iqnlist" => arg[1], "wwnlist" => arg[2])
+      body = {:iqnlist => arg[1], :wwnlist => arg[2]}
       put_rest_call(url, body)
     when DELETE then
       url = "/host/" + arg[0]
