@@ -14,7 +14,7 @@ Puppet::Type.type(:pure_host).provide(:host,
     hosts = []
 
     # Get a list of hosts from Pure array
-    results = transport.get_rest_call('/host')
+    results = Purest::Host.get
     Puppet.debug("Got a host result set from Pure: #{results.inspect}")
 
     results.each do |host|
@@ -40,24 +40,29 @@ Puppet::Type.type(:pure_host).provide(:host,
     end
   end
 
-  def flush
-    Puppet.debug("Flushing resource #{resource[:name]}: #{resource.inspect}")
-    if @property_hash[:ensure] == :absent
-      transport.execute_host_rest_api(self.class::DELETE, resource[:name])
-    else
-      Puppet.debug("Updating host resource")
-      transport.execute_host_rest_api(self.class::UPDATE, resource[:name], resource[:iqnlist], resource[:wwnlist])
-    end
-  end
+  #def flush
+  #  Puppet.debug("Flushing resource #{resource[:name]}: #{resource.inspect}")
+  #  if @property_hash[:ensure] == :absent
+  #    transport.execute_host_rest_api(self.class::DELETE, resource[:name])
+  #  else
+  #    Puppet.debug("Updating host resource")
+  #    transport.execute_host_rest_api(self.class::UPDATE, resource[:name], resource[:iqnlist], resource[:wwnlist])
+  #  end
+  #end
 
   def create
     Puppet.debug("<<<<<<<<<< Inside hostconfig create for host #{resource[:name]}")
-    transport.execute_host_rest_api(self.class::CREATE, resource[:name], resource[:iqnlist], resource[:wwnlist])
+    Purest::Host.create(name: resource[:name], iqnlist: resource[:iqnlist], wwnlist: resource[:wwnlist])
+  end
+
+  def update
+    Puppet.debug("<<<<<<<<<< Inside hostconfig update for host #{resource[:name]}")
+    Purest::Host.update(name: resource[:name], iqnlist: resource[:iqnlist], wwnlist: resource[:wwnlist])
   end
 
   def destroy
     Puppet.debug("Triggering destroy for #{resource[:name]}")
-    @property_hash[:ensure] = :absent
+    Purest::Host.delete(name: resource[:name])
   end
 
   def exists?

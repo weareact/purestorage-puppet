@@ -2,6 +2,7 @@ require 'puppet/util/network_device'
 require_relative 'facts'
 require 'puppet/purestorage_api'
 require 'uri'
+require 'purest'
 
 class Puppet::Util::NetworkDevice::Pure::Device
 
@@ -13,27 +14,20 @@ class Puppet::Util::NetworkDevice::Pure::Device
     redacted_url = @url.dup
     redacted_url.password = "****" if redacted_url.password
 
-    # Get the API version from config, default to PureStorageApi::REST_VERSION
-    @api_version = parse_api_version(@url.query) || PureStorageApi::REST_VERSION
-
-    Puppet.debug("Puppet::Device::Pure: connecting to Pure array: #{redacted_url} using API version #{@api_version}")
+    Puppet.debug("Puppet::Device::Pure: connecting to Pure array: #{redacted_url} using API version 1.12")
 
     raise ArgumentError, "invalid scheme #{@url.scheme}. Must be https" unless @url.scheme == 'https'
     raise ArgumentError, "no user specified" unless @url.user
     raise ArgumentError, "no password specified" unless @url.password
 
-    @transport = PureStorageApi.new(@url.host, @url.user, @url.password, @api_version)
-    Puppet.debug("Transport = #{@transport.inspect}")
-    @transport
-  end
-
-  def parse_api_version(query)
-    Puppet.debug("Got to parse_api_version. Query = #{query.inspect}")
-    if query
-      params = CGI.parse(query)
-      Puppet.debug("Params = #{params.inspect}")
-      params['api_version'].first unless params['api_version'].empty?
+    Purest.configure do |config|
+      config.api_version = '1.12'
+      config.options     = {ssl: {verify: false}}
+      config.password    = @url.password
+      config.url         = "https://#{@url.host}"
+      config.username    = @url.username
     end
+
   end
 
   def facts
