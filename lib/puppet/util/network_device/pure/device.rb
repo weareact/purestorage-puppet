@@ -1,6 +1,5 @@
 require 'puppet/util/network_device'
 require_relative 'facts'
-require 'puppet/purestorage_api'
 require 'uri'
 require 'purest'
 

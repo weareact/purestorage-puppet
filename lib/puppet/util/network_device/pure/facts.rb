@@ -1,5 +1,4 @@
 require 'puppet/util/network_device/pure'
-require 'puppet/purestorage_api'
 require 'purest'
 
 class Puppet::Util::NetworkDevice::Pure::Facts
