@@ -200,7 +200,7 @@ class PureStorageApi
   def put_rest_call(arg_url, arg_body)
     uri = URI.parse(@base_uri + arg_url)
 
-    request      = Net::HTTP::Put.new(uri.request_uri, header)
+    request      = Net::HTTP::Put.new(uri.request_uri)
     request.body = arg_body.to_json
 
     make_rest_api_call(request)
@@ -215,7 +215,7 @@ class PureStorageApi
 
     uri = URI.parse(@base_uri + arg_url)
 
-    request = Net::HTTP::Delete.new(uri.request_uri, header)
+    request = Net::HTTP::Delete.new(uri.request_uri)
 
     make_rest_api_call(request)
   end
@@ -275,7 +275,7 @@ class PureStorageApi
   # It is dedicated to Hosts
   #-----------------------------------------------
   def execute_host_rest_api(arg_key, *arg)
-    Puppet.info(arg_key + " Action for host:" + arg[0])
+    Puppet.debug(arg_key + " Action for host:" + arg[0])
     case arg_key
     when LIST then
       get_rest_call("/host")
