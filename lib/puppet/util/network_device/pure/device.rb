@@ -24,7 +24,7 @@ class Puppet::Util::NetworkDevice::Pure::Device
       config.options     = {ssl: {verify: false}}
       config.password    = @url.password
       config.url         = "https://#{@url.host}"
-      config.username    = @url.username
+      config.username    = @url.user
     end
 
   end
