@@ -18,10 +18,10 @@ Puppet::Type.type(:pure_host).provide(:host, :parent => Puppet::Provider::Pure) 
 
     results.each do |host|
       host_hash = {
-        :name    => host['name'],
-        :ensure  => :present,
-        :iqnlist => host['iqn'],
-        :wwnlist => host['wwn']
+          name:    host[:name],
+          ensure:  :present,
+          iqnlist: host[:iqn],
+          wwnlist: host[:wwn]
       }
 
       Puppet.debug("Host resource looks like: #{host_hash.inspect}")
@@ -40,10 +40,10 @@ Puppet::Type.type(:pure_host).provide(:host, :parent => Puppet::Provider::Pure) 
   end
 
   def flush
-   Puppet.debug("Flushing resource #{resource[:name]}: #{resource.inspect}")
+    Puppet.debug("Flushing resource #{resource[:name]}: #{resource.inspect}")
 
-   Puppet.debug("Updating host resource")
-   Purest::Host.update(name: resource[:name], iqnlist: resource[:iqnlist], wwnlist: resource[:wwnlist])
+    Puppet.debug("Updating host resource")
+    Purest::Host.update(name: resource[:name], iqnlist: resource[:iqnlist], wwnlist: resource[:wwnlist])
   end
 
   def create
