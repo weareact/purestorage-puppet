@@ -40,24 +40,21 @@ Puppet::Type.type(:pure_host).provide(:host, :parent => Puppet::Provider::Pure) 
   end
 
   def flush
-    Puppet.debug("Flushing resource #{resource[:name]}: #{resource.inspect}")
-
     Puppet.debug("Updating host resource")
-    Purest::Host.update(name: resource[:name], iqnlist: resource[:iqnlist], wwnlist: resource[:wwnlist])
+    update_response = Purest::Host.update(name: resource[:name], iqnlist: resource[:iqnlist], wwnlist: resource[:wwnlist])
+    Puppet.debug("Updated Host: #{update_response}")
   end
 
   def create
     Puppet.debug("<<<<<<<<<< Inside hostconfig create for host #{resource[:name]}")
-    Purest::Host.create(name: resource[:name], iqnlist: resource[:iqnlist], wwnlist: resource[:wwnlist])
-  end
-
-  def update
-    Puppet.debug("<<<<<<<<<< Inside hostconfig update for host #{resource[:name]}")
+    create_response = Purest::Host.create(name: resource[:name], iqnlist: resource[:iqnlist], wwnlist: resource[:wwnlist])
+    Puppet.debug("Created Host: #{create_response}")
   end
 
   def destroy
     Puppet.debug("Triggering destroy for #{resource[:name]}")
-    Purest::Host.delete(name: resource[:name])
+    delete_response = Purest::Host.delete(name: resource[:name])
+    Puppet.debug("Deleted Host: #{delete_response}")
   end
 
   def exists?
