@@ -60,21 +60,21 @@ Puppet::Type.type(:pure_host).provide(:host, :parent => Puppet::Provider::Pure) 
   # Pure API does not permit updating all these parameters at once, individual calls must be made.
   def name=(value)
     Puppet.debug("Updating Host Name")
-    update_response = Purest::Host.update(name: resource[:name])
+    update_response = Purest::Host.update(name: @property_hash[:name], new_name: resource[:name])
     Puppet.debug("Updated Host: #{update_response}")
     @property_hash[:name] == value
   end
 
   def iqnlist=(value)
     Puppet.debug("Updating Host IQN List")
-    update_response = Purest::Host.update(iqnlist: resource[:iqnlist])
+    update_response = Purest::Host.update(name: @property_hash[:name], iqnlist: resource[:iqnlist])
     Puppet.debug("Updated Host: #{update_response}")
     @property_hash[:iqnlist] == value
   end
 
   def wwnlist=(value)
     Puppet.debug("Updating Host WWN List")
-    update_response = Purest::Host.update(wwnlist: resource[:wwnlist])
+    update_response = Purest::Host.update(name: @property_hash[:name], wwnlist: resource[:wwnlist])
     Puppet.debug("Updated Host: #{update_response}")
     @property_hash[:wwnlist] == value
   end
