@@ -3,8 +3,8 @@ require 'puppet/provider/pure'
 require 'puppet/util/network_device'
 require 'puppet/util/network_device/pure/device'
 
-Puppet::Type.type(:pure_host).provide(:host,
-                                :parent => Puppet::Provider::Pure) do
+Puppet::Type.type(:pure_host).provide(:host, :parent => Puppet::Provider::Pure) do
+  confine feature: :purest
   desc "Provider for PureStorage host."
 
   mk_resource_methods
