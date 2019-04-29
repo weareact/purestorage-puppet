@@ -39,15 +39,12 @@ Puppet::Type.type(:pure_host).provide(:host, :parent => Puppet::Provider::Pure) 
     end
   end
 
-  #def flush
-  #  Puppet.debug("Flushing resource #{resource[:name]}: #{resource.inspect}")
-  #  if @property_hash[:ensure] == :absent
-  #    transport.execute_host_rest_api(self.class::DELETE, resource[:name])
-  #  else
-  #    Puppet.debug("Updating host resource")
-  #    transport.execute_host_rest_api(self.class::UPDATE, resource[:name], resource[:iqnlist], resource[:wwnlist])
-  #  end
-  #end
+  def flush
+   Puppet.debug("Flushing resource #{resource[:name]}: #{resource.inspect}")
+
+   Puppet.debug("Updating host resource")
+   Purest::Host.update(name: resource[:name], iqnlist: resource[:iqnlist], wwnlist: resource[:wwnlist])
+  end
 
   def create
     Puppet.debug("<<<<<<<<<< Inside hostconfig create for host #{resource[:name]}")
@@ -56,7 +53,6 @@ Puppet::Type.type(:pure_host).provide(:host, :parent => Puppet::Provider::Pure) 
 
   def update
     Puppet.debug("<<<<<<<<<< Inside hostconfig update for host #{resource[:name]}")
-    Purest::Host.update(name: resource[:name], iqnlist: resource[:iqnlist], wwnlist: resource[:wwnlist])
   end
 
   def destroy
