@@ -30,8 +30,9 @@ Puppet::Type.type(:pure_protection_group).provide(:protection_group, :parent => 
       pg_hash = {
           name:    protection_group[:name],
           ensure:  :present,
-          iqnlist: protection_group[:iqn],
-          wwnlist: protection_group[:wwn]
+          hosts:   protection_group[:hosts],
+          targets: protection_group[:targets],
+          volumes: protection_group[:volumes],
       }
 
       schedule = schedule_results.detect {|pg| pg[:name] == protection_group[:name]}
@@ -153,14 +154,14 @@ Puppet::Type.type(:pure_protection_group).provide(:protection_group, :parent => 
   end
 
   def snapshot_at=(value)
-      Puppet.debug("Updating Protection Group Snapshot Time")
-      update_response = Purest::ProtectionGroup.update(name: @property_hash[:name], snap_at: resource[:snapshot_at])
-      Puppet.debug("Updated Protection Group: #{update_response}")
-      @property_hash[:snapshot_at] == value
+    Puppet.debug("Updating Protection Group Snapshot Time")
+    update_response = Purest::ProtectionGroup.update(name: @property_hash[:name], snap_at: resource[:snapshot_at])
+    Puppet.debug("Updated Protection Group: #{update_response}")
+    @property_hash[:snapshot_at] == value
 
-      if @property_hash[:snapshot_frequency_unit] != :days
-        Puppet.warning("snapshot_at is only used when snapshot_frequency_unit is days, this change will have no effect.")
-      end
+    if @property_hash[:snapshot_frequency_unit] != :days
+      Puppet.warning("snapshot_at is only used when snapshot_frequency_unit is days, this change will have no effect.")
+    end
   end
 
   def update_retention_frequency(unit, amount)
