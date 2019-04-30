@@ -1,3 +1,5 @@
+require 'puppet/parameter/boolean'
+
 Puppet::Type.newtype(:pure_protection_group) do
   @doc = "It does CRUD operations for protection groups on a Pure Storage flash array."
   
@@ -48,9 +50,8 @@ Puppet::Type.newtype(:pure_protection_group) do
     end
   end
 
-  newparam(:snapshot_enabled) do
+  newparam(:snapshot_enabled, :boolean => true, :parent => Puppet::Parameter::Boolean) do
     desc "If snapshot schedule is enabled"
-    newvalues(:true, :false)
   end
 
   newparam(:snapshot_frequency_unit) do
