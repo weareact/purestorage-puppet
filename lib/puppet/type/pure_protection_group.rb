@@ -48,42 +48,42 @@ Puppet::Type.newtype(:pure_protection_group) do
     end
   end
 
-  newproperty(:snapshot_enabled) do
+  newparam(:snapshot_enabled) do
     desc "If snapshot schedule is enabled"
     newvalue(:true, :false)
   end
 
-  newproperty(:snapshot_frequency_unit) do
+  newparam(:snapshot_frequency_unit) do
     desc "The unit of time snapshot frequency is defined as: minutes, hours, days"
     newvalue(:minutes, :hours, :days)
   end
 
-  newproperty(:snapshot_frequency_amount) do
+  newparam(:snapshot_frequency_amount) do
     desc "How frequent snapshots are scheduled"
     newvalue(%r{\\d+})
   end
 
-  newproperty(:snapshot_at) do
+  newparam(:snapshot_at) do
     desc "Number of seconds after midnight that a daily snapshot is taken"
     newvalue(%r{\\d+})
   end
 
-  newproperty(:snapshot_retention_unit) do
+  newparam(:snapshot_retention_unit) do
     desc "The unit of time snapshot retention is defined as: minutes, hours, days"
     newvalue(:minutes, :hours, :days)
   end
 
-  newproperty(:snapshot_retention_amount) do
+  newparam(:snapshot_retention_amount) do
     desc "How long snapshots are kept for"
     newvalue(%r{\\d+})
   end
 
-  newproperty(:snapshot_per_day) do
+  newparam(:snapshot_per_day) do
     desc "How many snapshots are kept for the given number of days"
     newvalue(%r{\\d+})
   end
 
-  newproperty(:snapshot_for_days) do
+  newparam(:snapshot_for_days) do
     desc "How many days retained snapshots are kept for"
     newvalue(%r{\\d+})
   end
