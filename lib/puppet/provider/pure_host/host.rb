@@ -40,13 +40,13 @@ Puppet::Type.type(:pure_host).provide(:host, :parent => Puppet::Provider::Pure) 
   end
 
   def create
-    Puppet.debug("<<<<<<<<<< Inside hostconfig create for host #{resource[:name]}")
+    Puppet.debug("Creating host #{resource[:name]}")
     create_response = Purest::Host.create(name: resource[:name], iqnlist: resource[:iqnlist], wwnlist: resource[:wwnlist])
     Puppet.debug("Created Host: #{create_response}")
   end
 
   def destroy
-    Puppet.debug("Triggering destroy for #{resource[:name]}")
+    Puppet.debug("Deleting host #{resource[:name]}")
     delete_response = Purest::Host.delete(name: resource[:name])
     Puppet.debug("Deleted Host: #{delete_response}")
     @property_hash.clear

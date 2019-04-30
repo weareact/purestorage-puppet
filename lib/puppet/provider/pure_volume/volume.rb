@@ -2,6 +2,7 @@ require 'net/http'
 require 'puppet/provider/pure'
 require 'puppet/util/network_device'
 require 'puppet/util/network_device/pure/device'
+require 'purest'
 
 Puppet::Type.type(:pure_volume).provide(:volume, :parent => Puppet::Provider::Pure) do
   confine feature: :purest
@@ -13,12 +14,12 @@ Puppet::Type.type(:pure_volume).provide(:volume, :parent => Puppet::Provider::Pu
     volumes = []
 
     # Get a list of volumes from Pure array
-    results = transport.get_rest_call('/volume')
-    Puppet.debug("Got results: #{results.inspect}")
+    results = Purest::Volume.get
+    Puppet.debug("Got a volume result set from Pure: #{results.inspect}")
+
     results.each do |volume|
-      Puppet.debug("Volume: #{volume.inspect}")
       volume_hash = {
-        :name   => volume['name'],
+        :name   => volume[:name],
         :ensure => :present
       }
 
@@ -38,7 +39,7 @@ Puppet::Type.type(:pure_volume).provide(:volume, :parent => Puppet::Provider::Pu
       end
       volume_hash[:size] = vol_size
 
-      Puppet.debug("Volume_hash looks like: #{volume_hash}")
+      Puppet.debug("Volume resource looks like: #{volume_hash}")
 
       # Add volume to list of volumes
       volumes << new(volume_hash)
@@ -55,21 +56,17 @@ Puppet::Type.type(:pure_volume).provide(:volume, :parent => Puppet::Provider::Pu
     end
   end
 
-  def flush
-    Puppet.debug("Flushing resource #{resource[:name]}: #{resource.inspect}")
-    if @property_hash[:ensure] == :absent
-      transport.execute_volume_rest_api(self.class::DELETE, resource[:name])
-    end
-  end
-
   def create
-    Puppet.debug("<<<<<<<<<< Inside volume create for volume: #{resource[:name]} ")
-    transport.execute_volume_rest_api(self.class::CREATE, resource[:name], resource[:size])
+    Puppet.debug("Creating volume #{resource[:name]} ")
+    create_response = Purest::Volume.create(name: resource[:name], size: resource[:size])
+    Puppet.debug("Created Volume: #{create_response}")
   end
 
   def destroy
-    Puppet.debug("Triggering destroy for #{resource[:name]}")
-    @property_hash[:ensure] = :absent
+    Puppet.debug("Deleting volume #{resource[:name]}")
+    delete_response = Purest::Volume.delete(name: resource[:name])
+    Puppet.debug("Deleted Volume: #{delete_response}")
+    @property_hash.clear
   end
 
   def exists?
@@ -77,10 +74,20 @@ Puppet::Type.type(:pure_volume).provide(:volume, :parent => Puppet::Provider::Pu
     @property_hash[:ensure] == :present
   end
 
+  # Pure API does not permit updating all these parameters at once, individual calls must be made.
+  def name=(value)
+    Puppet.debug("Updating Volume Name")
+    update_response = Purest::Volume.update(name: @property_hash[:name], new_name: resource[:name])
+    Puppet.debug("Updated Volume: #{update_response}")
+    @property_hash[:name] == value
+  end
+
   # size setter
   def size=(value)
-    Puppet.debug("Puppet::Provider::Volume size=: setting volume size for volume #{resource[:name]}")
-    transport.execute_volume_rest_api(self.class::UPDATE, resource[:name], value)
+    Puppet.debug("Updating Volume Size")
+    update_response = Purest::Volume.update(name: @property_hash[:name], size: resource[:size])
+    Puppet.debug("Updated Volume: #{update_response}")
+    @property_hash[:size] == value
   end
 end
 
