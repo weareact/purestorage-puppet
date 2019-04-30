@@ -2,6 +2,7 @@ require 'net/http'
 require 'puppet/provider/pure'
 require 'puppet/util/network_device'
 require 'puppet/util/network_device/pure/device'
+require 'purest'
 
 Puppet::Type.type(:pure_connection).provide(:connection, :parent => Puppet::Provider::Pure) do
   confine feature: :purest
@@ -13,14 +14,14 @@ Puppet::Type.type(:pure_connection).provide(:connection, :parent => Puppet::Prov
     connections = []
 
     # Get a list of volume connections from Pure array
-    results = transport.get_rest_call('/volume?connect=true')
-    Puppet.debug("Got results: #{results.inspect}")
+    results = Purest::Volume.get(connect: true)
+    Puppet.debug("Got a host volume connections result set from Pure: #{results.inspect}")
 
     results.each do |connection|
       connection_hash = {
-        :host_name   => connection['host'],
+        :host_name   => connection[:host],
         :ensure      => :present,
-        :volume_name => connection['name']
+        :volume_name => connection[:name]
       }
 
       Puppet.debug("Connection resource looks like: #{connection_hash.inspect}")
@@ -44,13 +45,16 @@ Puppet::Type.type(:pure_connection).provide(:connection, :parent => Puppet::Prov
   end
 
   def create
-    Puppet.debug("<<<<<<<<<< Inside connection create")
-    transport.execute_connection_rest_api(self.class::CREATE,resource[:host_name],resource[:volume_name])
+    Puppet.debug("Creating connection #{resource[:host_name]} -> #{resource[:volume_name]} ")
+    create_response = Purest::Host.create(name: resource[:name], volume: resource[:volume_name])
+    Puppet.debug("Created Connection: #{create_response}")
   end
 
   def destroy
-    Puppet.debug("<<<<<<<<<< Inside connection destroy")
-    transport.execute_connection_rest_api(self.class::DELETE,resource[:host_name],resource[:volume_name])
+    Puppet.debug("Deleting connection #{resource[:name]}")
+    delete_response = Purest::Host.delete(name: resource[:name], volume: resource[:volume_name])
+    Puppet.debug("Deleted Connection: #{delete_response}")
+    @property_hash.clear
   end
 
   def exists?
