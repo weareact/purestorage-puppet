@@ -21,10 +21,10 @@ Puppet::Type.type(:pure_protection_group).provide(:protection_group, :parent => 
     Puppet.debug("Got a protection group result set from Pure: #{results.inspect}")
 
     schedule_results = Purest::ProtectionGroup.get(schedule: true)
-    Puppet.debug("Got a protection group schedule result set from Pure: #{results.inspect}")
+    Puppet.debug("Got a protection group schedule result set from Pure: #{schedule_results.inspect}")
 
     retention_results = Purest::ProtectionGroup.get(retention: true)
-    Puppet.debug("Got a protection group retention result set from Pure: #{results.inspect}")
+    Puppet.debug("Got a protection group retention result set from Pure: #{retention_results.inspect}")
 
     results.each do |protection_group|
       pg_hash = {
