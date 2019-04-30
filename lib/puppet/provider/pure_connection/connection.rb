@@ -46,13 +46,13 @@ Puppet::Type.type(:pure_connection).provide(:connection, :parent => Puppet::Prov
 
   def create
     Puppet.debug("Creating connection #{resource[:host_name]} -> #{resource[:volume_name]} ")
-    create_response = Purest::Host.create(name: resource[:name], volume: resource[:volume_name])
+    create_response = Purest::Host.create(name: resource[:host_name], volume: resource[:volume_name])
     Puppet.debug("Created Connection: #{create_response}")
   end
 
   def destroy
-    Puppet.debug("Deleting connection #{resource[:name]}")
-    delete_response = Purest::Host.delete(name: resource[:name], volume: resource[:volume_name])
+    Puppet.debug("Deleting connection #{resource[:host_name]} -> #{resource[:volume_name]} ")
+    delete_response = Purest::Host.delete(name: resource[:host_name], volume: resource[:volume_name])
     Puppet.debug("Deleted Connection: #{delete_response}")
     @property_hash.clear
   end
