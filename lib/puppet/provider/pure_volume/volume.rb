@@ -24,7 +24,7 @@ Puppet::Type.type(:pure_volume).provide(:volume, :parent => Puppet::Provider::Pu
       }
 
       # Need to convert from bytes to biggest possible unit
-      vol_size_bytes = volume['size']
+      vol_size_bytes = volume[:size]
       vol_size_mb = vol_size_bytes / 1024 / 1024
       if vol_size_mb % 1024 == 0
         vol_size_gb = vol_size_mb / 1024
