@@ -154,7 +154,7 @@ Puppet::Type.type(:pure_protection_group).provide(:protection_group, :parent => 
 
   def snapshot_at=(value)
       Puppet.debug("Updating Protection Group Snapshot Time")
-      update_response = Purest::ProtectionGroup.update(name: @property_hash[:name], snap_frequency: calc_raw_amount(unit, amount))
+      update_response = Purest::ProtectionGroup.update(name: @property_hash[:name], snap_at: resource[:snapshot_at])
       Puppet.debug("Updated Protection Group: #{update_response}")
       @property_hash[:snapshot_at] == value
 
