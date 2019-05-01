@@ -38,7 +38,7 @@ Puppet::Type.type(:pure_protection_group).provide(:protection_group, :parent => 
       schedule = schedule_results.detect {|pg| pg[:name] == protection_group[:name]}
 
       if schedule
-        pg_hash[:snapshot_enabled]          = schedule[:snap_enabled]
+        pg_hash[:snapshot_enabled]          = schedule[:snap_enabled].to_s
         pg_hash[:snapshot_frequency_unit]   = calc_frequency_unit(schedule[:snap_frequency])
         pg_hash[:snapshot_frequency_amount] = calc_frequency_amount(pg_hash[:snapshot_frequency_unit], schedule[:snap_frequency])
         pg_hash[:snapshot_at]               = schedule[:snap_at]
