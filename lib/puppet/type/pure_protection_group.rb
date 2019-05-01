@@ -61,12 +61,12 @@ Puppet::Type.newtype(:pure_protection_group) do
 
   newproperty(:snapshot_frequency_amount) do
     desc "How frequent snapshots are scheduled"
-    newvalues(%r{\\d+})
+    newvalues(%r{\d+})
   end
 
   newproperty(:snapshot_at) do
     desc "Number of seconds after midnight that a daily snapshot is taken"
-    newvalues(%r{\\d+})
+    newvalues(%r{\d+})
   end
 
   newproperty(:snapshot_retention_unit) do
@@ -76,17 +76,17 @@ Puppet::Type.newtype(:pure_protection_group) do
 
   newproperty(:snapshot_retention_amount) do
     desc "How long snapshots are kept for"
-    newvalues(%r{\\d+})
+    newvalues(%r{\d+})
   end
 
   newproperty(:snapshot_per_day) do
     desc "How many snapshots are kept for the given number of days"
-    newvalues(%r{\\d+})
+    newvalues(%r{\d+})
   end
 
   newproperty(:snapshot_for_days) do
     desc "How many days retained snapshots are kept for"
-    newvalues(%r{\\d+})
+    newvalues(%r{\d+})
   end
 
   newparam(:device_url) do
