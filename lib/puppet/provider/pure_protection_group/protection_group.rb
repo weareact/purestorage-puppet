@@ -79,7 +79,7 @@ Puppet::Type.type(:pure_protection_group).provide(:protection_group, :parent => 
     return raw_value / PERIOD[frequency]
   end
 
-  def self.calc_raw_amount(frequency, amount_value)
+  def calc_raw_amount(frequency, amount_value)
     return amount_value * PERIOD[frequency]
   end
 
