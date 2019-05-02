@@ -29,9 +29,8 @@ class Puppet::Util::NetworkDevice::Pure::Facts
     connection_hash             = convert_array_hash_to_hash_array(connection_info, :name)
     @pure_storage[:connections] = connection_hash
 
-    Puppet.debug("Got facts: #{@facts.inspect}")
-
     @facts[:pure_storage] = @pure_storage
+    Puppet.debug("Got facts: #{@facts.inspect}")
 
     @facts
   end
@@ -44,6 +43,7 @@ class Puppet::Util::NetworkDevice::Pure::Facts
       current << i.delete_if {|k, v| k == hash_key}
       result[name] = current
     end
+    Puppet.debug("Converted hash: #{result.inspect}")
 
     result
   end
