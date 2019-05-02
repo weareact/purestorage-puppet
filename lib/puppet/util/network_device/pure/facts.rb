@@ -32,5 +32,7 @@ class Puppet::Util::NetworkDevice::Pure::Facts
     Puppet.debug("Got facts: #{@facts.inspect}")
 
     @facts[:pure_storage] = @pure_storage
+
+    @facts
   end
 end
