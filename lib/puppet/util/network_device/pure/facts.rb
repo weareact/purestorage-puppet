@@ -9,7 +9,7 @@ class Puppet::Util::NetworkDevice::Pure::Facts
   end
 
   def retrieve
-    # @facts = {}
+    @facts = {}
     # @facts['vendor_id']   = 'pure'
     #
     # Puppet.debug("Fetching facts from Pure Array")
@@ -26,6 +26,6 @@ class Puppet::Util::NetworkDevice::Pure::Facts
     # Puppet.debug("Returned connection info: #{connection_info.inspect}")
     # @facts['connections'] = connection_info
     # Puppet.debug("Got facts: #{@facts.inspect}")
-    # @facts
+    @facts
   end
 end
