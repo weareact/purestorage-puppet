@@ -1,8 +1,8 @@
 node 'cloud-dev-405-a12-02.puretec.purestorage.com' {
 
-  volume{ 'pure_storage_volume':
-                ensure      => 'absent',
-                volume_name => 'test_02',
-                volume_size => '1.0G',
-        }
+  pure_volume { 'pure_storage_volume':
+    ensure => 'present',
+    name   => 'test_02',
+    size   => '4.0G',
+  }
 }

@@ -2,7 +2,7 @@ require 'puppet/util/network_device/pure'
 require 'purest'
 
 class Puppet::Util::NetworkDevice::Pure::Facts
-  attr_reader :transport, :facts
+  attr_reader :facts
 
   def initialize
 
@@ -38,7 +38,7 @@ class Puppet::Util::NetworkDevice::Pure::Facts
   def convert_array_hash_to_hash_array(array, hash_key)
     result = {}
     array.each do |i|
-      name    = i[hash_key]
+      name    = i[hash_key].to_sym
       current = result[name] ||= []
       current << i.delete_if {|k, v| k == hash_key}
       result[name] = current

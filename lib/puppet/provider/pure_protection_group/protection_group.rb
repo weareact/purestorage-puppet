@@ -71,17 +71,17 @@ Puppet::Type.type(:pure_protection_group).provide(:protection_group, :parent => 
   def self.calc_frequency_unit(frequency)
     PERIOD.each do |period, amount|
       if frequency % amount == 0
-        return period
+        return period.to_s
       end
     end
   end
 
   def self.calc_frequency_amount(frequency, raw_value)
-    return raw_value / PERIOD[frequency]
+    return raw_value / PERIOD[frequency.to_sym]
   end
 
   def calc_raw_amount(frequency, amount_value)
-    return amount_value * PERIOD[frequency]
+    return amount_value * PERIOD[frequency.to_sym]
   end
 
   def create

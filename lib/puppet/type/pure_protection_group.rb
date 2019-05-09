@@ -94,4 +94,13 @@ Puppet::Type.newtype(:pure_protection_group) do
   newparam(:device_url) do
       desc "URL in the form of https://<user>:<passwd>@<FQ_Device_Name or IP>"
   end
+
+  # Require pure_host and pure_volume resources
+  autorequire(:pure_host) do
+    self[:hosts]
+  end
+
+  autorequire(:pure_volume) do
+    self[:volumes]
+  end
 end

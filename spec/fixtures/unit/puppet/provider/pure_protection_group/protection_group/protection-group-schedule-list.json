@@ -1,0 +1,7 @@
+[
+  {
+    "name" : "pg01",
+    "snap_frequency" : 3600,
+    "snap_enabled" : true
+  }
+]

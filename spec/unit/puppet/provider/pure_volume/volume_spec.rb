@@ -4,9 +4,7 @@ describe Puppet::Type.type(:pure_volume).provider(:volume) do
 
   before :each do
     allow(Puppet::Type.type(:pure_volume)).to receive(:defaultprovider).and_return described_class
-    @transport = double(:transport)
     @device    = double(:device)
-    allow(@device).to receive(:transport) { @transport }
   end
 
   let :resource do
@@ -36,8 +34,7 @@ describe Puppet::Type.type(:pure_volume).provider(:volume) do
 
   describe '#instances' do
     it 'should return an array of current volumes' do
-      expect(@transport).to receive(:get_rest_call).with('/volume') { JSON.parse(File.read(my_fixture('volume-list.json'))) }
-      allow(described_class).to receive(:transport) { @transport }
+      allow_any_instance_of(Purest::Volume).to receive(:get).with(no_args) {JSON.parse(File.read(my_fixture('volume-list.json')), symbolize_names: true)}
 
       instances = described_class.instances
       expect(instances.size).to eq(2)
@@ -65,8 +62,8 @@ describe Puppet::Type.type(:pure_volume).provider(:volume) do
 
   describe '#prefetch' do
     it 'exists' do
-      expect(@transport).to receive(:get_rest_call).with('/volume') { JSON.parse(File.read(my_fixture('volume-list.json'))) }
-      allow(described_class).to receive(:transport) { @transport }
+      allow_any_instance_of(Purest::Volume).to receive(:get).with(no_args) {JSON.parse(File.read(my_fixture('volume-list.json')), symbolize_names: true)}
+
       current_provider = resource.provider
       resources = { 'volume-name' => resource }
       described_class.prefetch(resources)
@@ -76,30 +73,28 @@ describe Puppet::Type.type(:pure_volume).provider(:volume) do
 
   describe 'when creating a volume' do
     it 'should be able to create it' do
-      expect(@transport).to receive(:execute_volume_rest_api).with('create', 'pure_vol', '10G')
-      allow(resource.provider).to receive(:transport) { @transport }
+      expect_any_instance_of(Purest::Volume).to receive(:create).with(name: 'pure_vol', size: '10G')
       resource.provider.create
     end
   end
 
   describe 'when destroying a volume' do
     it 'should be able to delete it' do
-      expect(@transport).to receive(:execute_volume_rest_api).with('delete', 'pure_vol')
-      allow(resource.provider).to receive(:transport) { @transport }
-      resource.provider.set(:name => 'pure_vol')
+      expect_any_instance_of(Purest::Volume).to receive(:delete).with(name: 'pure_vol')
       resource.provider.destroy
-      resource.provider.flush
     end
   end
 
   describe 'when modifying a volume' do
+    before(:each) {
+      resource.provider.set(name: 'pure_vol')
+    }
+
     describe 'for #size=' do
       it "should be able to increase a volume size" do
-        expect(@transport).to receive(:execute_volume_rest_api).with('update', 'pure_vol', '20G')
-        allow(resource.provider).to receive(:transport) { @transport }
-        # resource.provider.set(:name => 'pure_vol', :size => '10G')
-        resource[:size] = '20G'
-        resource.provider.send("size=", '20G')
+        expect_any_instance_of(Purest::Volume).to receive(:update).with(name: 'pure_vol', size: '2T')
+        resource[:size] = '2T'
+        resource.provider.send("size=", '2T')
       end
     end
   end

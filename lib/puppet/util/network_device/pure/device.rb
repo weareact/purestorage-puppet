@@ -5,7 +5,7 @@ require 'purest'
 
 class Puppet::Util::NetworkDevice::Pure::Device
 
-  attr_accessor :api_version, :url, :transport
+  attr_accessor :api_version, :url
 
   def initialize(url, options = {})
     @url = URI.parse(url)
@@ -26,6 +26,8 @@ class Puppet::Util::NetworkDevice::Pure::Device
       config.url         = "https://#{@url.host}"
       config.username    = @url.user
     end
+
+    self.api_version = '1.12'
 
   end
 
