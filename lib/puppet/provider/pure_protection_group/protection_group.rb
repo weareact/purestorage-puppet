@@ -30,9 +30,9 @@ Puppet::Type.type(:pure_protection_group).provide(:protection_group, :parent => 
       pg_hash = {
           name:    protection_group[:name],
           ensure:  :present,
-          hosts:   protection_group[:hosts],
-          targets: protection_group[:targets],
-          volumes: protection_group[:volumes],
+          hosts:   protection_group[:hosts].sort,
+          targets: protection_group[:targets].sort,
+          volumes: protection_group[:volumes].sort,
       }
 
       schedule = schedule_results.detect {|pg| pg[:name] == protection_group[:name]}
