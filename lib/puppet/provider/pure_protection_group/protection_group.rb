@@ -27,16 +27,12 @@ Puppet::Type.type(:pure_protection_group).provide(:protection_group, :parent => 
     Puppet.debug("Got a protection group retention result set from Pure: #{retention_results.inspect}")
 
     results.each do |protection_group|
-      hosts   = protection_group[:hosts].sort if protection_group[:hosts] != nil
-      targets = protection_group[:targets].sort if protection_group[:targets] != nil
-      volumes = protection_group[:volumes].sort if protection_group[:volumes] != nil
-
       pg_hash = {
           name:    protection_group[:name],
           ensure:  :present,
-          hosts:   hosts ||= nil,
-          targets: targets ||= nil,
-          volumes: volumes ||= nil,
+          hosts: protection_group[:hosts],
+          targets: protection_group[:targets],
+          volumes: protection_group[:volumes],
       }
 
       schedule = schedule_results.detect {|pg| pg[:name] == protection_group[:name]}
