@@ -1,0 +1,15 @@
+[
+  {
+    "name" : "pg01",
+    "source" : "purearray01",
+    "hosts" : [
+      "host01"
+    ],
+    "volumes" : [
+      "volume01"
+    ],
+    "targets" : [
+      "target01"
+    ]
+  }
+]

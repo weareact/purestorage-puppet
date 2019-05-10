@@ -1,11 +1,11 @@
 require 'net/http'
-require 'puppet/purestorage_api'
 require 'puppet/provider/pure'
 require 'puppet/util/network_device'
 require 'puppet/util/network_device/pure/device'
+require 'purest'
 
-Puppet::Type.type(:pure_host).provide(:host,
-                                :parent => Puppet::Provider::Pure) do
+Puppet::Type.type(:pure_host).provide(:host, :parent => Puppet::Provider::Pure) do
+  confine feature: :purest
   desc "Provider for PureStorage host."
 
   mk_resource_methods
@@ -14,15 +14,15 @@ Puppet::Type.type(:pure_host).provide(:host,
     hosts = []
 
     # Get a list of hosts from Pure array
-    results = transport.getRestCall('/host')
+    results = Purest::Host.get
     Puppet.debug("Got a host result set from Pure: #{results.inspect}")
 
     results.each do |host|
       host_hash = {
-        :name    => host['name'],
-        :ensure  => :present,
-        :iqnlist => host['iqn'],
-        :wwnlist => host['wwn']
+          name:    host[:name],
+          ensure:  :present,
+          iqnlist: host[:iqn],
+          wwnlist: host[:wwn]
       }
 
       Puppet.debug("Host resource looks like: #{host_hash.inspect}")
@@ -40,29 +40,44 @@ Puppet::Type.type(:pure_host).provide(:host,
     end
   end
 
-  def flush
-    Puppet.debug("Flushing resource #{resource[:name]}: #{resource.inspect}")
-    if @property_hash[:ensure] == :absent
-      transport.executeHostRestApi(self.class::DELETE, resource[:name])
-    else
-      Puppet.debug("Updating host resource")
-      transport.executeHostRestApi(self.class::UPDATE, resource[:name], resource[:iqnlist], resource[:wwnlist])
-    end
-  end
-
   def create
-    Puppet.debug("<<<<<<<<<< Inside hostconfig create for host #{resource[:name]}")
-    transport.executeHostRestApi(self.class::CREATE, resource[:name], resource[:iqnlist], resource[:wwnlist])
+    Puppet.debug("Creating host #{resource[:name]}")
+    create_response = Purest::Host.create(name: resource[:name], iqnlist: resource[:iqnlist], wwnlist: resource[:wwnlist])
+    Puppet.debug("Created Host: #{create_response}")
   end
 
   def destroy
-    Puppet.debug("Triggering destroy for #{resource[:name]}")
-    @property_hash[:ensure] = :absent
+    Puppet.debug("Deleting host #{resource[:name]}")
+    delete_response = Purest::Host.delete(name: resource[:name])
+    Puppet.debug("Deleted Host: #{delete_response}")
+    @property_hash.clear
   end
 
   def exists?
     Puppet.debug("Checking existence...")
     @property_hash[:ensure] == :present
+  end
+
+  # Pure API does not permit updating all these parameters at once, individual calls must be made.
+  def name=(value)
+    Puppet.debug("Updating Host Name")
+    update_response = Purest::Host.update(name: @property_hash[:name], new_name: resource[:name])
+    Puppet.debug("Updated Host: #{update_response}")
+    @property_hash[:name] == value
+  end
+
+  def iqnlist=(value)
+    Puppet.debug("Updating Host IQN List")
+    update_response = Purest::Host.update(name: @property_hash[:name], iqnlist: resource[:iqnlist])
+    Puppet.debug("Updated Host: #{update_response}")
+    @property_hash[:iqnlist] == value
+  end
+
+  def wwnlist=(value)
+    Puppet.debug("Updating Host WWN List")
+    update_response = Purest::Host.update(name: @property_hash[:name], wwnlist: resource[:wwnlist])
+    Puppet.debug("Updated Host: #{update_response}")
+    @property_hash[:wwnlist] == value
   end
 
 end

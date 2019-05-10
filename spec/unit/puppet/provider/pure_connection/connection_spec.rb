@@ -4,9 +4,7 @@ describe Puppet::Type.type(:pure_connection).provider(:connection) do
 
   before :each do
     allow(Puppet::Type.type(:pure_connection)).to receive(:defaultprovider).and_return described_class
-    @transport = double(:transport)
     @device    = double(:device)
-    allow(@device).to receive(:transport) { @transport }
   end
 
   let :resource do
@@ -37,8 +35,7 @@ describe Puppet::Type.type(:pure_connection).provider(:connection) do
 
   describe '#instances' do
     it 'should return an array of current host:volume connections' do
-      expect(@transport).to receive(:getRestCall).with('/volume?connect=true') { JSON.parse(File.read(my_fixture('volume-connection-list.json'))) }
-      allow(described_class).to receive(:transport) { @transport }
+      allow_any_instance_of(Purest::Volume).to receive(:get).with(connect: true) { JSON.parse(File.read(my_fixture('volume-connection-list.json')), symbolize_names: true) }
 
       instances = described_class.instances
       expect(instances.size).to eq(2)
@@ -66,8 +63,7 @@ describe Puppet::Type.type(:pure_connection).provider(:connection) do
 
   describe '#prefetch' do
     it 'exists' do
-      expect(@transport).to receive(:getRestCall).with('/volume?connect=true') { JSON.parse(File.read(my_fixture('volume-connection-list.json'))) }
-      allow(described_class).to receive(:transport) { @transport }
+      allow_any_instance_of(Purest::Volume).to receive(:get).with(connect: true) {JSON.parse(File.read(my_fixture('volume-connection-list.json')), symbolize_names: true)}
       current_provider = resource.provider
 
       # Create a catalog
@@ -86,16 +82,14 @@ describe Puppet::Type.type(:pure_connection).provider(:connection) do
 
   describe 'when creating a connection' do
     it 'should be able to create it' do
-      expect(@transport).to receive(:executeConnectionRestApi).with('create', 'host_01', 'vol_01')
-      allow(resource.provider).to receive(:transport) { @transport }
+      expect_any_instance_of(Purest::Host).to receive(:create).with(name: 'host_01', volume: 'vol_01')
       resource.provider.create
     end
   end
 
   describe 'when destroying a connection' do
     it 'should be able to delete it' do
-      expect(@transport).to receive(:executeConnectionRestApi).with('delete', 'host_01', 'vol_01')
-      allow(resource.provider).to receive(:transport) { @transport }
+      expect_any_instance_of(Purest::Host).to receive(:delete).with(name: 'host_01', volume: 'vol_01')
       resource.provider.destroy
     end
   end

@@ -11,7 +11,7 @@ Puppet::Type.newtype(:pure_host) do
   
   newproperty(:iqnlist, :array_matching => :all) do
     desc "Host iqnlist"
-    newvalue(%r{^\w+$})
+    newvalue(%r{^[-._:\w]+$})
 
     # Pretty output for arrays.
     def should_to_s(value)

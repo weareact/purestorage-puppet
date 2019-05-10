@@ -24,5 +24,8 @@
 #
 class pure {
 
-
+  package { 'purest':
+    ensure   => installed,
+    provider => 'puppet_gem'
+  }
 }

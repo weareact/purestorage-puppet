@@ -4,21 +4,19 @@ describe Puppet::Type.type(:pure_host).provider(:host) do
 
   before :each do
     allow(Puppet::Type.type(:pure_host)).to receive(:defaultprovider).and_return described_class
-    @transport = double(:transport)
-    @device    = double(:device)
-    allow(@device).to receive(:transport) { @transport }
+    @device = double(:device)
   end
 
   let :resource do
     Puppet::Type.type(:pure_host).new(
-      :name   => 'pure_host',
-      :ensure => :present
+        :name   => 'pure_host',
+        :ensure => :present
     )
   end
 
   let :provider do
     described_class.new(
-      :name => 'pure_host'
+        :name           => 'pure_host'
     )
   end
 
@@ -35,77 +33,72 @@ describe Puppet::Type.type(:pure_host).provider(:host) do
 
   describe '#instances' do
     it 'should return an array of current hosts' do
-      expect(@transport).to receive(:getRestCall).with('/host') { JSON.parse(File.read(my_fixture('host-list.json'))) }
-      allow(described_class).to receive(:transport) { @transport }
+      allow_any_instance_of(Purest::Host).to receive(:get).with(no_args) {JSON.parse(File.read(my_fixture('host-list.json')), symbolize_names: true)}
 
       instances = described_class.instances
       expect(instances.size).to eq(1)
 
       expect(instances.map do |prov|
         {
-          :name    => prov.get(:name),
-          :ensure  => prov.get(:ensure),
-          :iqnlist => prov.get(:iqnlist),
-          :wwnlist => prov.get(:wwnlist),
+            :name    => prov.get(:name),
+            :ensure  => prov.get(:ensure),
+            :iqnlist => prov.get(:iqnlist),
+            :wwnlist => prov.get(:wwnlist),
         }
       end).to eq([
-        {
-          :name    => 'host01',
-          :ensure  => resource[:ensure],
-          :iqnlist => [ '123456' ],
-          :wwnlist => [ '51402EC0017AA6B4' ]
-        }
+          {
+              :name    => 'host01',
+              :ensure  => resource[:ensure],
+              :iqnlist => ['123456'],
+              :wwnlist => ['51402EC0017AA6B4']
+          }
       ])
     end
   end
 
   describe '#prefetch' do
     it 'exists' do
-      expect(@transport).to receive(:getRestCall).with('/host') { JSON.parse(File.read(my_fixture('host-list.json'))) }
-      allow(described_class).to receive(:transport) { @transport }
+      allow_any_instance_of(Purest::Host).to receive(:get).with(no_args) {JSON.parse(File.read(my_fixture('host-list.json')), symbolize_names: true)}
+
       current_provider = resource.provider
-      resources = { 'volume-name' => resource }
+      resources        = {'name' => resource}
       described_class.prefetch(resources)
-      expect(resources['volume-name']).not_to be(current_provider)
+      expect(resources['name']).not_to be(current_provider)
     end
   end
 
-  describe 'when creating a volume' do
+  describe 'when creating a host' do
     it 'should be able to create it' do
-      expect(@transport).to receive(:executeHostRestApi).with('create', 'pure_host', nil, nil)
-      allow(resource.provider).to receive(:transport) { @transport }
+      expect_any_instance_of(Purest::Host).to receive(:create).with(name: 'pure_host', iqnlist: nil, wwnlist: nil)
       resource.provider.create
     end
   end
 
   describe 'when destroying a volume' do
     it 'should be able to delete it' do
-      expect(@transport).to receive(:executeHostRestApi).with('delete', 'pure_host')
-      allow(resource.provider).to receive(:transport) { @transport }
-      resource.provider.set(:name => 'pure_host')
+      expect_any_instance_of(Purest::Host).to receive(:delete).with(name: 'pure_host')
       resource.provider.destroy
-      resource.provider.flush
     end
   end
 
-  describe 'when modifying a volume' do
+  describe 'when modifying a host' do
+    before(:each) {
+      resource.provider.set(name: 'pure_host')
+    }
+
     describe 'for iqnlist' do
       it "should be able to update iqnlist" do
-        expect(@transport).to receive(:executeHostRestApi).with('update', 'pure_host', ['123456'], nil)
-        allow(resource.provider).to receive(:transport) { @transport }
-        # resource.provider.set(:name => 'pure_vol', :size => '10G')
+        expect_any_instance_of(Purest::Host).to receive(:update).with(name: 'pure_host', iqnlist: ["123456"])
         resource[:iqnlist] = ['123456']
-        resource.provider.flush
+        resource.provider.send("iqnlist=", ['123456'])
       end
     end
 
     describe 'for wwnlist' do
       it "should be able to update wwnlist" do
-        expect(@transport).to receive(:executeHostRestApi).with('update', 'pure_host', nil, ['abcdef'])
-        allow(resource.provider).to receive(:transport) { @transport }
-        # resource.provider.set(:name => 'pure_vol', :size => '10G')
+        expect_any_instance_of(Purest::Host).to receive(:update).with(name: 'pure_host', wwnlist: ["abcdef"])
         resource[:wwnlist] = ['abcdef']
-        resource.provider.flush
+        resource.provider.send("wwnlist=", ['abcdef'])
       end
     end
   end

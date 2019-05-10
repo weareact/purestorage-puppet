@@ -25,7 +25,7 @@ questions about this module before running or modifying.
 
 The Pure Storage provider allows you to provision volumes on a Pure Storage array
 from either a puppet client or a puppet device proxy host. The provider has
-been developed against CentOS 7.2 using Puppet-4.8.1. At this stage testing
+been developed against CentOS 7.6 using Puppet-5.5.3. At this stage testing
 is completely manual.
 
 ## Description
@@ -34,10 +34,15 @@ Using the `volume`, `hostconfig` and `connection` types, one
 can quickly provision remote storage and attach it via iSCSI from a
 Pure Storage array to a client.
 
-The provider utilizes the robust REST API (V1.6) available on the Pure Storage
+The provider utilizes the REST API (V1.12) available on the Pure Storage
 array to remotely provision the necessary resources.
 
 ## Setup
+
+### Dependencies
+
+The `purest 1.0.6` or greater is used as an API library for connecting to the REST API. This can be installed with the following command:
+`/opt/puppetlabs/puppet/bin/gem install purest -v 1.0.6`
 
 ### Connecting to a Pure Storage Array
 
@@ -116,12 +121,15 @@ Command: `puppet apply <manifest_file_path>`
         - eg.  host_iqnlist =>  ["iqn.1994-04.jp.co.pure:rsd.d9s.t.10103.0e03j","iqn.1994-04.jp.co.pure:rsd.d9s.t.10103.0e03k"],
       * volume size cannot be reduced due to a RestAPI constraint.
    2. create \ update \ delete host
-   3. create \ delete connection
+   3. create \ delete host-volume connection
+   4. create \ update \ delete protection group
+      * Note replication is not current supported
 
 ## Limitations
 
 Today the Pure Storage puppet module supports create, update and delete of 
-volumes, hosts and attachment between the two. 
+volumes, hosts and attachment between the two.
+Additionally the limited management of Protection Groups. 
 Currently it only supports iSCSI connections and IQN ids.
 
 ## Development
