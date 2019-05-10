@@ -27,12 +27,16 @@ Puppet::Type.type(:pure_protection_group).provide(:protection_group, :parent => 
     Puppet.debug("Got a protection group retention result set from Pure: #{retention_results.inspect}")
 
     results.each do |protection_group|
+      hosts   = protection_group[:hosts].sort if protection_group[:hosts] != nil
+      targets = protection_group[:targets].sort if protection_group[:targets] != nil
+      volumes = protection_group[:volumes].sort if protection_group[:volumes] != nil
+
       pg_hash = {
           name:    protection_group[:name],
           ensure:  :present,
-          hosts:   protection_group[:hosts].sort,
-          targets: protection_group[:targets].sort,
-          volumes: protection_group[:volumes].sort,
+          hosts:   hosts ||= nil,
+          targets: targets ||= nil,
+          volumes: volumes ||= nil,
       }
 
       schedule = schedule_results.detect {|pg| pg[:name] == protection_group[:name]}
@@ -41,7 +45,7 @@ Puppet::Type.type(:pure_protection_group).provide(:protection_group, :parent => 
         pg_hash[:snapshot_enabled]          = schedule[:snap_enabled].to_s
         pg_hash[:snapshot_frequency_unit]   = calc_frequency_unit(schedule[:snap_frequency])
         pg_hash[:snapshot_frequency_amount] = calc_frequency_amount(pg_hash[:snapshot_frequency_unit], schedule[:snap_frequency])
-        snapshot_time = schedule[:snap_at] ||= 0
+        snapshot_time                       = schedule[:snap_at] ||= 0
         pg_hash[:snapshot_at]               = snapshot_time / 3600
       end
 
@@ -156,7 +160,7 @@ Puppet::Type.type(:pure_protection_group).provide(:protection_group, :parent => 
 
   def snapshot_at=(value)
     Puppet.debug("Updating Protection Group Snapshot Time")
-    snapshot_time = resource[:snapshot_at] ||= 0
+    snapshot_time   = resource[:snapshot_at] ||= 0
     update_response = Purest::ProtectionGroup.update(name: @property_hash[:name], snap_at: snapshot_time * 3600)
     Puppet.debug("Updated Protection Group: #{update_response}")
     @property_hash[:snapshot_at] == value

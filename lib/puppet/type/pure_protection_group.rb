@@ -21,8 +21,6 @@ Puppet::Type.newtype(:pure_protection_group) do
       value.inspect
     end
 
-    munge(&:sort)
-
   end
 
   newproperty(:targets, :array_matching => :all) do
@@ -37,8 +35,6 @@ Puppet::Type.newtype(:pure_protection_group) do
       value.inspect
     end
 
-    munge(&:sort)
-
   end
 
   newproperty(:volumes, :array_matching => :all) do
@@ -52,8 +48,6 @@ Puppet::Type.newtype(:pure_protection_group) do
     def is_to_s(value)
       value.inspect
     end
-
-    munge(&:sort)
 
   end
 
