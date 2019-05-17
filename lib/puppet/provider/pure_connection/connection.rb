@@ -2,7 +2,6 @@ require 'net/http'
 require 'puppet/provider/pure'
 require 'puppet/util/network_device'
 require 'puppet/util/network_device/pure/device'
-require 'purest'
 
 Puppet::Type.type(:pure_connection).provide(:connection, :parent => Puppet::Provider::Pure) do
   confine feature: :purest
