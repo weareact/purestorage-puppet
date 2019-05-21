@@ -1,5 +1,5 @@
 # Define the connected volume
-define pure_connected_volume (
+define pure::connected_volume (
   String $hostname,
   String $volumename,
   Integer $lun
