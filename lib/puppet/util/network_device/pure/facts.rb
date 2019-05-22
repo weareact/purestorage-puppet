@@ -26,6 +26,16 @@ class Puppet::Util::NetworkDevice::Pure::Facts
 
     connection_info = Purest::Host.get(connect: true)
     Puppet.debug("Returned connection info: #{connection_info.inspect}")
+    volume_info = Purest::Volume.get
+    Puppet.debug("Returned volume info: #{volume_info.inspect}")
+
+    connection_info.each do |ci|
+      related_volume = volume_info.detect {|vol| vol[:name] == ci[:vol]}
+      if related_volume
+        ci[:volserial] = related_volume[:serial]
+      end
+    end
+
     connection_hash             = convert_array_hash_to_hash_array(connection_info, :name)
     @pure_storage[:connections] = connection_hash
 
