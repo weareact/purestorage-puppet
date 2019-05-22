@@ -22,10 +22,15 @@
 #
 # Copyright 2017,  Pure Storage, Inc.
 #
-class pure {
+class pure (
+  Boolean $install_purest = false
+) {
 
-  package { 'purest':
-    ensure   => installed,
-    provider => 'puppet_gem'
+  if $install_purest {
+    package { 'purest':
+      ensure   => installed,
+      provider => 'puppet_gem'
+    }
   }
+
 }
