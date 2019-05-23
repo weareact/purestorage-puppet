@@ -1,5 +1,4 @@
 require 'puppet/util/network_device/pure'
-require 'purest'
 
 class Puppet::Util::NetworkDevice::Pure::Facts
   attr_reader :facts

@@ -1,5 +1,5 @@
 # Define the connected volume
-define pure::connected_volume (
+define purefa::connected_volume (
   String $hostname,
   String $volumename,
   String $volumeserial,

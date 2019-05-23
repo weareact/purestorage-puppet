@@ -1,7 +1,6 @@
 require 'puppet/util/network_device'
 require_relative 'facts'
 require 'uri'
-require 'purest'
 
 class Puppet::Util::NetworkDevice::Pure::Device
 

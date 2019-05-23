@@ -1,5 +1,5 @@
 # Define the authentication type
-define pure::device (
+define purefa::device (
   $hostname,
   $username,
   $password,

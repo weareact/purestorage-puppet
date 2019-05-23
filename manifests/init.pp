@@ -1,4 +1,4 @@
-# Class: pure
+# Class: purefa
 # ===========================
 #
 # This module manages Pure Storage FlashArray devices.
@@ -22,7 +22,7 @@
 #
 # Copyright 2017,  Pure Storage, Inc.
 #
-class pure (
+class purefa (
   Boolean $install_purest = false
 ) {
 
