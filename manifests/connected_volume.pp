@@ -53,6 +53,11 @@ define purefa::connected_volume (
     device  => "/dev/mapper/${volumename}",
     fstype  => 'xfs',
     options => 'defaults,discard,_netdev',
-    require => [File["${_mount_location}"], Multipath::Path["${_wwid}"]]
+    require => [File["${_mount_location}"], Multipath::Path["${_wwid}"]],
+    notify => Exec['/bin/mount -a']
+  }
+
+  exec { '/bin/mount -a':
+    refreshonly => true
   }
 }
