@@ -54,10 +54,11 @@ define purefa::connected_volume (
     fstype  => 'xfs',
     options => 'defaults,discard,_netdev',
     require => [File["${_mount_location}"], Multipath::Path["${_wwid}"]],
-    notify => Exec['/bin/mount -a']
+    notify => Exec["mountall-${_mount_location}"]
   }
 
-  exec { '/bin/mount -a':
+  exec { "mountall-${_mount_location}":
+    command => '/bin/mount -a',
     refreshonly => true
   }
 }
