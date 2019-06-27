@@ -47,18 +47,19 @@ define purefa::connected_volume (
     devalias => $volumename
   }
 
+  exec { "mkfs-${_mount_location}":
+    command => "/usr/sbin/mkfs.xfs /dev/mapper/${volumename}",
+    unless  => "/usr/sbin/blkid -t TYPE=xfs /dev/mapper/${volumename}",
+    require => [File["${_mount_location}"], Multipath::Path["${_wwid}"]],
+  }
+
   mount { $_mount_location:
     ensure  => 'present',
     atboot  => true,
     device  => "/dev/mapper/${volumename}",
     fstype  => 'xfs',
     options => 'defaults,discard,_netdev',
-    require => [File["${_mount_location}"], Multipath::Path["${_wwid}"]],
-    notify => Exec["mountall-${_mount_location}"]
+    require => Exec["mkfs-${_mount_location}"],
   }
 
-  exec { "mountall-${_mount_location}":
-    command => '/bin/mount -a',
-    refreshonly => true
-  }
 }
