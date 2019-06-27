@@ -59,7 +59,7 @@ define purefa::connected_volume (
     device  => "/dev/mapper/${volumename}",
     fstype  => 'xfs',
     options => 'defaults,discard,_netdev',
-    require => Exec["mkfs-${_mount_location}"],
+    require => Exec["mkfs-${volumename}"],
   }
 
 }
