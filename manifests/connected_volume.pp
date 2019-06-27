@@ -54,7 +54,7 @@ define purefa::connected_volume (
   }
 
   mount { $_mount_location:
-    ensure  => 'present',
+    ensure  => 'mounted',
     atboot  => true,
     device  => "/dev/mapper/${volumename}",
     fstype  => 'xfs',
