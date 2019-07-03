@@ -21,7 +21,7 @@ define purefa::connected_volume (
     $_group = 'oinstall'
   }
   elsif $volumename =~ /_software$/ {
-    $_mount_location = '/oracle/home'
+    $_mount_location = '/software/oracle'
     $_owner = 'oracle'
     $_group = 'oinstall'
   }
