@@ -60,6 +60,13 @@ define purefa::connected_volume (
     fstype  => 'xfs',
     options => 'defaults,discard,_netdev',
     require => Exec["mkfs-${volumename}"],
+    notify => Exec["owndir-${_mount_location}"]
+  }
+
+  exec { "owndir-${_mount_location}":
+    command => "chown -R ${_owner}:${_group} ${_mount_location}",
+    path    => $::path,
+    refreshonly => true
   }
 
 }
