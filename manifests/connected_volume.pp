@@ -50,8 +50,6 @@ define purefa::connected_volume (
   exec { "mkfs-${volumename}":
     command => "/usr/sbin/mkfs.xfs /dev/mapper/${volumename}",
     unless  => "/usr/sbin/blkid -t TYPE=xfs /dev/mapper/${volumename}",
-    user => $_owner,
-    group => $_group,
     require => [File["${_mount_location}"], Multipath::Path["${_wwid}"]],
   }
 
