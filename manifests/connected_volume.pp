@@ -44,7 +44,8 @@ define purefa::connected_volume (
 
   multipath::path { "${_wwid}":
     ensure => 'present',
-    devalias => $volumename
+    devalias => $volumename,
+    notify => Service['multipath']
   }
 
   exec { "mkfs-${volumename}":
