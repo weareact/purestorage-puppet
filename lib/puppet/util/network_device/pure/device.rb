@@ -35,8 +35,7 @@ class Puppet::Util::NetworkDevice::Pure::Device
     Puppet.debug("Inside Device FACTS Initialize URL :" + @url.to_s)
     @facts ||= Puppet::Util::NetworkDevice::Pure::Facts.new
     Puppet.debug("After creating FACTS Object !!!")
-    facts = @facts.retrieve
-    facts
+    @facts.retrieve
   end
 
 end
